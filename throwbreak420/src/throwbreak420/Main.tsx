@@ -7,6 +7,8 @@ const ALL_MOVES = {
 };
 
 var initialized = false;
+var lastButton: string | null = null;
+const keyboardToButton: { [k: string]: string } = {};
 
 export default function Main() {
   const ref = createRef<HTMLVideoElement>();
@@ -36,8 +38,19 @@ export default function Main() {
     const src = `video/${isGrounded ? "grounded" : "standing"}/${_move}.mkv`;
     backupRef.current!.src = src;
   };
+  const breakThrow = (button: string) => {
+    console.log(button);
+  };
   return (
     <div
+      tabIndex={1}
+      onKeyDown={(e) => {
+        if (keyboardToButton[e.key] === undefined) {
+          if (lastButton === null) return;
+          keyboardToButton[e.key] = lastButton;
+        }
+        breakThrow(keyboardToButton[e.key]);
+      }}
       style={{
         height: "100vH",
         display: "flex",
@@ -138,7 +151,21 @@ export default function Main() {
       <div style={{ flexGrow: 1, position: "relative" }}>
         <Video refObj={ref} backupRef={backupRef} prepRandom={prepRandom} />
       </div>
-      <div>buttons</div>
+      <div style={{ display: "flex", justifyContent: "space-around" }}>
+        {["1", "2", "1+2"].map((k) => (
+          <div key={k}>
+            <button
+              style={{ padding: "1em", fontSize: "xx-large" }}
+              onClick={() => {
+                lastButton = k;
+                breakThrow(k);
+              }}
+            >
+              {k}
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -155,7 +182,7 @@ function Video(props: {
     props.prepRandom();
   }, [props]);
   return (
-    <div style={{ height: "100%" }}>
+    <div style={{ height: "100%", display: "flex", justifyContent: "center" }}>
       <video
         ref={props.refObj}
         style={{
