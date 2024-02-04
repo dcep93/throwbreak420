@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { createRef, useEffect, useState } from "react";
 
 const ALL_MOVES = {
   1: "1 break",
@@ -6,7 +6,10 @@ const ALL_MOVES = {
   12: "1+2 break",
 };
 
+var initialized = false;
+
 export default function Main() {
+  const ref = createRef<HTMLVideoElement>();
   const [isP1, updateIsP1] = useState(true);
   const [isGrounded, updateIsGrounded] = useState(true);
   const [moves, updateMoves] = useState(
@@ -15,6 +18,23 @@ export default function Main() {
   const [speed, _updateSpeed] = useState(1);
   const updateSpeed = (s: number) => {
     _updateSpeed(s);
+    ref.current!.playbackRate = s;
+  };
+  const [move, updateMove] = useState("");
+  const playRandom = () => {
+    const choices = Object.entries(moves)
+      .map(([k, v]) => ({ k, v }))
+      .filter(({ v }) => v)
+      .map(({ k }) => k);
+    const _move = choices[Math.floor(Math.random() * choices.length)];
+    if (_move === undefined) {
+      initialized = false;
+      return;
+    }
+    updateMove(_move);
+    ref.current!.src = `video/${
+      isGrounded ? "grounded" : "standing"
+    }/${_move}.mkv`;
   };
   return (
     <div
@@ -114,23 +134,35 @@ export default function Main() {
           </div>
         </form>
       </div>
-      <div>state</div>
+      <div>state: {move}</div>
       <div style={{ flexGrow: 1, position: "relative" }}>
-        <video
-          style={{
-            position: "absolute",
-            height: "100%",
-            maxWidth: "100%",
-          }}
-          autoPlay
-          muted
-          loop
-          //   onEnded={() => alert("gotem")}
-        >
-          <source src={`video/grounded/1.mkv?${new Date()}`} />
-        </video>
+        <Video refObj={ref} playRandom={playRandom} />
       </div>
       <div>buttons</div>
     </div>
+  );
+}
+
+function Video(props: {
+  refObj: React.RefObject<HTMLVideoElement>;
+  playRandom: () => void;
+}) {
+  useEffect(() => {
+    if (initialized || !props.refObj?.current) return;
+    initialized = true;
+    props.playRandom();
+  }, [props]);
+  return (
+    <video
+      ref={props.refObj}
+      style={{
+        position: "absolute",
+        height: "100%",
+        maxWidth: "100%",
+      }}
+      autoPlay
+      muted
+      onEnded={() => props.playRandom()}
+    ></video>
   );
 }
