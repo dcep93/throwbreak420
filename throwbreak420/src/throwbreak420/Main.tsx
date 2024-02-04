@@ -20,6 +20,9 @@ export default function Main() {
   const [streak, updateStreak] = useState(0);
   const [move, updateMove] = useState("");
   const [date, updateDate] = useState(0);
+  const [lastMove, updateLastMove] = useState("");
+  const [lastButton, updateLastButton] = useState("");
+  const [frame, updateFrame] = useState(0);
   var timeout: NodeJS.Timeout;
   const prepRandom = () => {
     console.log("prep");
@@ -41,10 +44,17 @@ export default function Main() {
   const breakThrow = (button: string) => {
     const vid = mainRef.current;
     if (!vid) return;
+    const rawFrame = Math.floor(vid.currentTime * 60);
+    const thisFrame = rawFrame - 66;
+    if (thisFrame < 0) return;
     vid.pause();
-    timeout = setTimeout(() => prepRandom(), 1000);
-    updateStreak(button.replace("+", "") !== move ? 0 : streak + 1);
-    console.log(button, move);
+    const throwBreak = move.replace("12", "1+2");
+    const incorrect = button !== throwBreak;
+    updateStreak(incorrect ? 0 : streak + 1);
+    updateLastMove(throwBreak);
+    updateLastButton(button);
+    updateFrame(thisFrame);
+    timeout = setTimeout(() => prepRandom(), incorrect ? 2000 : 500);
   };
   return (
     <div
@@ -168,8 +178,10 @@ export default function Main() {
             </form>
           </div>
           <div>
-            <div>state: {move}</div>
             <div>streak: {streak}</div>
+            <div>throw: {lastMove}</div>
+            <div>break: {lastButton}</div>
+            <div>frame: {frame}</div>
           </div>
           <div style={{ flexGrow: 1, position: "relative" }}>
             <Video
@@ -179,7 +191,7 @@ export default function Main() {
               refObj={mainRef}
               backupRef={backupRef}
               prepRandom={prepRandom}
-              onEnded={() => breakThrow("")}
+              onEnded={() => breakThrow("-")}
               speed={speed}
             />
           </div>
