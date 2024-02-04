@@ -10,6 +10,7 @@ var initialized = false;
 
 export default function Main() {
   const ref = createRef<HTMLVideoElement>();
+  const backupRef = createRef<HTMLVideoElement>();
   const [isP1, updateIsP1] = useState(true);
   const [isGrounded, updateIsGrounded] = useState(true);
   const [moves, updateMoves] = useState(
@@ -21,7 +22,7 @@ export default function Main() {
     ref.current!.playbackRate = s;
   };
   const [move, updateMove] = useState("");
-  const playRandom = () => {
+  const prepRandom = () => {
     const choices = Object.entries(moves)
       .map(([k, v]) => ({ k, v }))
       .filter(({ v }) => v)
@@ -32,9 +33,8 @@ export default function Main() {
       return;
     }
     updateMove(_move);
-    ref.current!.src = `video/${
-      isGrounded ? "grounded" : "standing"
-    }/${_move}.mkv`;
+    const src = `video/${isGrounded ? "grounded" : "standing"}/${_move}.mkv`;
+    backupRef.current!.src = src;
   };
   return (
     <div
@@ -136,7 +136,7 @@ export default function Main() {
       </div>
       <div>state: {move}</div>
       <div style={{ flexGrow: 1, position: "relative" }}>
-        <Video refObj={ref} playRandom={playRandom} />
+        <Video refObj={ref} backupRef={backupRef} prepRandom={prepRandom} />
       </div>
       <div>buttons</div>
     </div>
@@ -145,24 +145,40 @@ export default function Main() {
 
 function Video(props: {
   refObj: React.RefObject<HTMLVideoElement>;
-  playRandom: () => void;
+  backupRef: React.RefObject<HTMLVideoElement>;
+  prepRandom: () => void;
 }) {
   useEffect(() => {
-    if (initialized || !props.refObj?.current) return;
+    if (initialized || !props.backupRef.current || !props.refObj.current)
+      return;
     initialized = true;
-    props.playRandom();
+    props.prepRandom();
   }, [props]);
   return (
-    <video
-      ref={props.refObj}
-      style={{
-        position: "absolute",
-        height: "100%",
-        maxWidth: "100%",
-      }}
-      autoPlay
-      muted
-      onEnded={() => props.playRandom()}
-    ></video>
+    <div style={{ height: "100%" }}>
+      <video
+        ref={props.refObj}
+        style={{
+          position: "absolute",
+          height: "100%",
+          maxWidth: "100%",
+          zIndex: 1,
+        }}
+        autoPlay
+        muted
+        onEnded={() => props.prepRandom()}
+      ></video>
+      <video
+        ref={props.backupRef}
+        style={{
+          position: "absolute",
+          height: "100%",
+          maxWidth: "100%",
+        }}
+        onCanPlay={(e) => {
+          props.refObj.current!.src = (e.target as HTMLVideoElement).src;
+        }}
+      ></video>
+    </div>
   );
 }
