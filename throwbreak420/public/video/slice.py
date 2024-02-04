@@ -10,6 +10,9 @@ import numpy
 # 2:   0:54-1:01 standing/2.mkv 3326 3531
 # 1+2: 1:00-1:06 standing/12.mkv 3745 3950
 
+# filename=grounded/1.mkv; start_frame=110; end_frame=200; ffmpeg -i raw.mkv -vf "select=between(n\,$start_frame\,$end_frame),setpts=PTS-STARTPTS" -af "aselect=between(n\,$start_frame\,$end_frame),asetpts=PTS-STARTPTS" $filename
+
+
 def main():
     vid = imageio.get_reader('raw.mkv',  'ffmpeg')
     data = []
