@@ -5,54 +5,54 @@ const ALL_MOVES = {
   2: "2 break",
   12: "1+2 break",
 };
-const keyboardToButton: { [k: string]: string } = {};
+const shortcutToInput: { [k: string]: string } = {};
 
 export default function Main() {
-  const [buttonToSet, updateButtonToSet] = useState("");
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
+  const [shortcutToSet, updateShortcutToSet] = useState("");
   const [isP1, updateIsP1] = useState(true);
-  const [isGrounded, updateIsGrounded] = useState(true);
-  const [moves, updateMoves] = useState(
+  const [isStanding, updateIsStanding] = useState(true);
+  const [speed, updateSpeed] = useState(1);
+  const [throwBreaks, updateThrowBreaks] = useState(
     Object.fromEntries(Object.keys(ALL_MOVES).map((k) => [k, true]))
   );
-  const [speed, updateSpeed] = useState(1);
-  const [streak, updateStreak] = useState(0);
-  const [move, updateMove] = useState("");
+  const [throwBreak, updateThrowBreak] = useState("");
   const [date, updateDate] = useState(0);
-  const [lastMove, updateLastMove] = useState("");
-  const [lastButton, updateLastButton] = useState("");
+  const [streak, updateStreak] = useState(0);
+  const [lastThrowBreak, updateLastThrowBreak] = useState("");
+  const [lastInput, updateLastInput] = useState("");
   const [frame, updateFrame] = useState(0);
   var timeout: NodeJS.Timeout;
   const prepRandom = () => {
     console.log("prep");
     clearTimeout(timeout);
-    const choices = Object.entries(moves)
+    const choices = Object.entries(throwBreaks)
       .map(([k, v]) => ({ k, v }))
       .filter(({ v }) => v)
       .map(({ k }) => k);
-    const nextMove = choices[Math.floor(Math.random() * choices.length)];
-    if (nextMove === undefined) {
+    const nextThrowBreak = choices[Math.floor(Math.random() * choices.length)];
+    if (nextThrowBreak === undefined) {
       return;
     }
-    if (nextMove === move) {
+    if (nextThrowBreak === throwBreak) {
       updateDate(Date.now());
       return;
     }
-    updateMove(nextMove);
+    updateThrowBreak(nextThrowBreak);
   };
   const breakThrow = (button: string) => {
-    const vid = mainRef.current;
-    if (!vid) return;
-    const rawFrame = Math.floor(vid.currentTime * 60);
+    const video = mainRef.current;
+    if (!video) return;
+    const rawFrame = Math.floor(video.currentTime * 60);
     const thisFrame = rawFrame - 66;
     if (thisFrame < 0) return;
-    vid.pause();
-    const throwBreak = move.replace("12", "1+2");
-    const incorrect = button !== throwBreak;
+    video.pause();
+    const fixedThrowBreak = throwBreak.replace("12", "1+2");
+    const incorrect = button !== fixedThrowBreak;
     updateStreak(incorrect ? 0 : streak + 1);
-    updateLastMove(throwBreak);
-    updateLastButton(button);
+    updateLastThrowBreak(throwBreak);
+    updateLastInput(button);
     updateFrame(thisFrame);
     timeout = setTimeout(() => prepRandom(), incorrect ? 2000 : 500);
   };
@@ -60,23 +60,25 @@ export default function Main() {
     <div
       tabIndex={1}
       onKeyDown={(e) => {
-        if (buttonToSet !== "") {
-          keyboardToButton[e.key] = buttonToSet;
-          updateButtonToSet({ "1": "2", "2": "1+2", "1+2": "" }[buttonToSet]!);
+        if (shortcutToSet !== "") {
+          shortcutToInput[e.key] = shortcutToSet;
+          updateShortcutToSet(
+            { "1": "2", "2": "1+2", "1+2": "" }[shortcutToSet]!
+          );
           return;
         }
         var button =
-          { "1": "1", "2": "2", "3": "1+2" }[e.key] || keyboardToButton[e.key];
+          { "1": "1", "2": "2", "3": "1+2" }[e.key] || shortcutToInput[e.key];
         if (button === undefined) {
           if (e.metaKey || !e.code.startsWith("Key")) return;
-          updateButtonToSet("1");
+          updateShortcutToSet("1");
           return;
         }
         breakThrow(button);
       }}
     >
-      {buttonToSet !== "" ? (
-        <div>set button {buttonToSet}</div>
+      {shortcutToSet !== "" ? (
+        <div>set button {shortcutToSet}</div>
       ) : (
         <div
           style={{
@@ -84,6 +86,7 @@ export default function Main() {
             display: "flex",
             flexDirection: "column",
             fontFamily: "Courier New",
+            // TODO styling
           }}
         >
           <div>
@@ -122,10 +125,10 @@ export default function Main() {
                     <input
                       type="radio"
                       name="grounded"
-                      checked={isGrounded}
-                      onChange={() => updateIsGrounded(true)}
+                      checked={isStanding}
+                      onChange={() => updateIsStanding(true)}
                     />
-                    grounded
+                    standing
                   </label>
                 </div>
                 <div>
@@ -133,10 +136,10 @@ export default function Main() {
                     <input
                       type="radio"
                       name="grounded"
-                      checked={!isGrounded}
-                      onChange={() => updateIsGrounded(false)}
+                      checked={!isStanding}
+                      onChange={() => updateIsStanding(false)}
                     />
-                    standing
+                    grounded
                   </label>
                 </div>
               </div>
@@ -146,10 +149,12 @@ export default function Main() {
                     <label>
                       <input
                         type={"checkbox"}
-                        checked={moves[k]}
+                        checked={throwBreaks[k]}
                         onChange={() =>
-                          updateMoves(
-                            Object.assign({}, moves, { [k]: !moves[k] })
+                          updateThrowBreaks(
+                            Object.assign({}, throwBreaks, {
+                              [k]: !throwBreaks[k],
+                            })
                           )
                         }
                       />
@@ -179,15 +184,15 @@ export default function Main() {
           </div>
           <div>
             <div>streak: {streak}</div>
-            <div>throw: {lastMove}</div>
-            <div>break: {lastButton}</div>
+            <div>throw: {lastThrowBreak}</div>
+            <div>input: {lastInput}</div>
             <div>frame: {frame}</div>
           </div>
           <div style={{ flexGrow: 1, position: "relative" }}>
             <Video
               src={`video/${
-                isGrounded ? "grounded" : "standing"
-              }/${move}.mkv#${date}`}
+                isStanding ? "standing" : "grounded"
+              }/${throwBreak}.mkv#${date}`}
               refObj={mainRef}
               backupRef={backupRef}
               prepRandom={prepRandom}
