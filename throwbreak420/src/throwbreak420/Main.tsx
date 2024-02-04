@@ -9,7 +9,7 @@ const keyboardToButton: { [k: string]: string } = {};
 
 export default function Main() {
   const [buttonToSet, updateButtonToSet] = useState("");
-  const ref = createRef<HTMLVideoElement>();
+  const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
   const [isP1, updateIsP1] = useState(true);
   const [isGrounded, updateIsGrounded] = useState(true);
@@ -17,8 +17,13 @@ export default function Main() {
     Object.fromEntries(Object.keys(ALL_MOVES).map((k) => [k, true]))
   );
   const [speed, updateSpeed] = useState(1);
+  const [streak, updateStreak] = useState(0);
   const [move, updateMove] = useState("");
+  const [date, updateDate] = useState(0);
+  var timeout: NodeJS.Timeout;
   const prepRandom = () => {
+    console.log("prep");
+    clearTimeout(timeout);
     const choices = Object.entries(moves)
       .map(([k, v]) => ({ k, v }))
       .filter(({ v }) => v)
@@ -27,10 +32,19 @@ export default function Main() {
     if (nextMove === undefined) {
       return;
     }
-    updateMove(`${nextMove}.mkv#${Date.now()}`);
+    if (nextMove === move) {
+      updateDate(Date.now());
+      return;
+    }
+    updateMove(nextMove);
   };
   const breakThrow = (button: string) => {
-    console.log(button);
+    const vid = mainRef.current;
+    if (!vid) return;
+    vid.pause();
+    timeout = setTimeout(() => prepRandom(), 1000);
+    updateStreak(button.replace("+", "") !== move ? 0 : streak + 1);
+    console.log(button, move);
   };
   return (
     <div
@@ -44,7 +58,7 @@ export default function Main() {
         var button =
           { "1": "1", "2": "2", "3": "1+2" }[e.key] || keyboardToButton[e.key];
         if (button === undefined) {
-          if (!e.code.startsWith("Key")) return;
+          if (e.metaKey || !e.code.startsWith("Key")) return;
           updateButtonToSet("1");
           return;
         }
@@ -153,13 +167,19 @@ export default function Main() {
               </div>
             </form>
           </div>
-          <div>state: {move}</div>
+          <div>
+            <div>state: {move}</div>
+            <div>streak: {streak}</div>
+          </div>
           <div style={{ flexGrow: 1, position: "relative" }}>
             <Video
-              src={`video/${isGrounded ? "grounded" : "standing"}/${move}`}
-              refObj={ref}
+              src={`video/${
+                isGrounded ? "grounded" : "standing"
+              }/${move}.mkv#${date}`}
+              refObj={mainRef}
               backupRef={backupRef}
               prepRandom={prepRandom}
+              onEnded={() => breakThrow("")}
               speed={speed}
             />
           </div>
@@ -185,6 +205,7 @@ function Video(props: {
   src: string;
   refObj: React.RefObject<HTMLVideoElement>;
   backupRef: React.RefObject<HTMLVideoElement>;
+  onEnded: () => void;
   prepRandom: () => void;
   speed: number;
 }) {
@@ -204,7 +225,7 @@ function Video(props: {
         }}
         autoPlay
         muted
-        onEnded={() => props.prepRandom()}
+        onEnded={() => props.onEnded()}
       ></video>
       <video
         src={props.src}
