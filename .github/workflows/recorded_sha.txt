@@ -1,0 +1,2 @@
+local_date
+local_sha
