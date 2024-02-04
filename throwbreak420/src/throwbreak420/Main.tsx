@@ -1,4 +1,4 @@
-import { createRef, useEffect, useState } from "react";
+import { createRef, useState } from "react";
 
 const ALL_MOVES = {
   1: "1 break",
@@ -6,6 +6,8 @@ const ALL_MOVES = {
   12: "1+2 break",
 };
 const shortcutToInput: { [k: string]: string } = {};
+
+var initialized = false;
 
 export default function Main() {
   const mainRef = createRef<HTMLVideoElement>();
@@ -41,6 +43,10 @@ export default function Main() {
     }
     updateThrowBreak(nextThrowBreak);
   };
+  if (!initialized) {
+    initialized = true;
+    prepRandom();
+  }
   const breakThrow = (button: string) => {
     const video = mainRef.current;
     if (!video) return;
@@ -183,19 +189,18 @@ export default function Main() {
             </form>
           </div>
           <div>
-            <div>streak: {streak}</div>
             <div>throw: {lastThrowBreak}</div>
             <div>input: {lastInput}</div>
             <div>frame: {frame}</div>
+            <div>streak: {streak}</div>
           </div>
           <div style={{ flexGrow: 1, position: "relative" }}>
             <Video
               src={`video/${
                 isStanding ? "standing" : "grounded"
               }/${throwBreak}.mkv#${date}`}
-              refObj={mainRef}
+              mainRef={mainRef}
               backupRef={backupRef}
-              prepRandom={prepRandom}
               onEnded={() => breakThrow("-")}
               speed={speed}
             />
@@ -220,20 +225,15 @@ export default function Main() {
 
 function Video(props: {
   src: string;
-  refObj: React.RefObject<HTMLVideoElement>;
+  mainRef: React.RefObject<HTMLVideoElement>;
   backupRef: React.RefObject<HTMLVideoElement>;
   onEnded: () => void;
-  prepRandom: () => void;
   speed: number;
 }) {
-  useEffect(() => {
-    if (!props.backupRef.current || !props.refObj.current) return;
-    props.prepRandom();
-  }, [props]);
   return (
     <div style={{ height: "100%", display: "flex", justifyContent: "center" }}>
       <video
-        ref={props.refObj}
+        ref={props.mainRef}
         style={{
           position: "absolute",
           height: "100%",
@@ -253,8 +253,8 @@ function Video(props: {
           maxWidth: "100%",
         }}
         onCanPlay={(e) => {
-          props.refObj.current!.src = (e.target as HTMLVideoElement).src;
-          props.refObj.current!.playbackRate = props.speed;
+          props.mainRef.current!.src = (e.target as HTMLVideoElement).src;
+          props.mainRef.current!.playbackRate = props.speed;
         }}
       ></video>
     </div>
