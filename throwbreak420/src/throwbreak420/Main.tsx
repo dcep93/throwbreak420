@@ -111,6 +111,7 @@ export default function Main() {
           <div
             style={{
               height: "100vH",
+              width: "100vW",
               display: "flex",
               flexDirection: "column",
               fontFamily: "Courier New",
@@ -211,7 +212,7 @@ export default function Main() {
                 </div>
               </form>
             </div>
-            <div>
+            <div style={{ paddingLeft: "2em" }}>
               <div>throw: {lastThrowBreak}</div>
               <div>input: {lastInput}</div>
               <div>frame: {frame}</div>
