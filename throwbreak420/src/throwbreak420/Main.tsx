@@ -6,9 +6,9 @@ const ALL_MOVES = {
   12: "1+2 break",
 };
 const shortcutToInput: { [k: string]: string } = {
-  Digit1: "1",
-  Digit2: "2",
-  Digit3: "1+2",
+  1: "1",
+  2: "2",
+  3: "1+2",
   u: "1",
   i: "2",
   o: "1+2",
