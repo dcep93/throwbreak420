@@ -57,7 +57,7 @@ export default function Main() {
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     useEffect(() => {
-      //   prepRandom();
+      prepRandom();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isP1, isStanding, possibleThrowBreaks]);
     const breakThrow = (button: string) => {
