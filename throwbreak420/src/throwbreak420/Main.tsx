@@ -1,4 +1,4 @@
-import { createRef, useState } from "react";
+import { createRef, useEffect, useState } from "react";
 
 const ALL_MOVES = {
   1: "1 break",
@@ -7,8 +7,6 @@ const ALL_MOVES = {
 };
 const shortcutToInput: { [k: string]: string } = {};
 
-var initialized = false;
-
 export default function Main() {
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
@@ -16,7 +14,7 @@ export default function Main() {
   const [isP1, updateIsP1] = useState(true);
   const [isStanding, updateIsStanding] = useState(true);
   const [speed, updateSpeed] = useState(1);
-  const [throwBreaks, updateThrowBreaks] = useState(
+  const [possibleThrowBreaks, updatePossibleThrowBreaks] = useState(
     Object.fromEntries(Object.keys(ALL_MOVES).map((k) => [k, true]))
   );
   const [throwBreak, updateThrowBreak] = useState("");
@@ -27,9 +25,8 @@ export default function Main() {
   const [frame, updateFrame] = useState(0);
   var timeout: NodeJS.Timeout;
   const prepRandom = () => {
-    console.log("prep");
     clearTimeout(timeout);
-    const choices = Object.entries(throwBreaks)
+    const choices = Object.entries(possibleThrowBreaks)
       .map(([k, v]) => ({ k, v }))
       .filter(({ v }) => v)
       .map(({ k }) => k);
@@ -43,10 +40,10 @@ export default function Main() {
     }
     updateThrowBreak(nextThrowBreak);
   };
-  if (!initialized) {
-    initialized = true;
+  useEffect(() => {
     prepRandom();
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [possibleThrowBreaks]);
   const breakThrow = (button: string) => {
     const video = mainRef.current;
     if (!video) return;
@@ -155,11 +152,11 @@ export default function Main() {
                     <label>
                       <input
                         type={"checkbox"}
-                        checked={throwBreaks[k]}
+                        checked={possibleThrowBreaks[k]}
                         onChange={() =>
-                          updateThrowBreaks(
-                            Object.assign({}, throwBreaks, {
-                              [k]: !throwBreaks[k],
+                          updatePossibleThrowBreaks(
+                            Object.assign({}, possibleThrowBreaks, {
+                              [k]: !possibleThrowBreaks[k],
                             })
                           )
                         }
@@ -253,8 +250,9 @@ function Video(props: {
           maxWidth: "100%",
         }}
         onCanPlay={(e) => {
-          props.mainRef.current!.src = (e.target as HTMLVideoElement).src;
-          props.mainRef.current!.playbackRate = props.speed;
+          const video = props.mainRef.current!;
+          video.src = (e.target as HTMLVideoElement).src;
+          video.playbackRate = props.speed; // TODO make not necessary cuz we dont rerender!
         }}
       ></video>
     </div>
