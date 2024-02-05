@@ -136,7 +136,7 @@ export default function Main() {
                     </label>
                   </div>
                   <div>
-                    <label>
+                    <label onClick={() => alert("not implemented")}>
                       <input
                         disabled // TODO
                         type="radio"
