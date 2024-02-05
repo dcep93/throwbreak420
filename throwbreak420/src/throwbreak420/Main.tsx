@@ -13,18 +13,18 @@ export default function Main() {
   var prepRandom = () => {};
   var onEnded = () => {};
   var speed = 1;
+  var throwBreak = "";
+  var timeout: NodeJS.Timeout;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
 
   function Helper(props: { children: ReactNode }) {
-    var throwBreak = "";
     const [shortcutToSet, updateShortcutToSet] = useState("");
     const [isP1, updateIsP1] = useState(true);
     const [isStanding, updateIsStanding] = useState(true);
     const [possibleThrowBreaks, updatePossibleThrowBreaks] = useState(
       Object.fromEntries(Object.keys(ALL_MOVES).map((k) => [k, true]))
     );
-    var timeout: NodeJS.Timeout;
 
     prepRandom = () => {
       if (!initialzed) return;
@@ -70,7 +70,7 @@ export default function Main() {
       const fullThrowBreak = throwBreak.replace("12", "1+2");
       const incorrect = thisFrame >= 20 || button !== fullThrowBreak;
       updateStreak(incorrect ? 0 : streak + 1);
-      updateLastThrowBreak(throwBreak);
+      updateLastThrowBreak(fullThrowBreak);
       updateLastInput(button);
       updateFrame(thisFrame);
       timeout = setTimeout(() => prepRandom(), incorrect ? 3000 : 500);
@@ -88,10 +88,11 @@ export default function Main() {
             );
             return;
           }
-          var button =
+          const button =
             { "1": "1", "2": "2", "3": "1+2" }[e.key] || shortcutToInput[e.key];
           if (button === undefined) {
             if (e.metaKey || !e.code.startsWith("Key")) return;
+            initialzed = false;
             updateShortcutToSet("1");
             return;
           }
