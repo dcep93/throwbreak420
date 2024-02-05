@@ -10,38 +10,40 @@ const shortcutToInput: { [k: string]: string } = {};
 var initialzed = false;
 
 export default function Main() {
-  var throwBreak = "";
+  var prepRandom = () => {};
+  var onEnded = () => {};
   var speed = 1;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
-  const [shortcutToSet, updateShortcutToSet] = useState("");
-  const [isP1, updateIsP1] = useState(true);
-  const [isStanding, updateIsStanding] = useState(true);
-  const [possibleThrowBreaks, updatePossibleThrowBreaks] = useState(
-    Object.fromEntries(Object.keys(ALL_MOVES).map((k) => [k, true]))
-  );
-  var timeout: NodeJS.Timeout;
-
-  const prepRandom = () => {
-    if (!initialzed) return;
-    clearTimeout(timeout);
-    const choices = Object.entries(possibleThrowBreaks)
-      .map(([k, v]) => ({ k, v }))
-      .filter(({ v }) => v)
-      .map(({ k }) => k);
-    const nextThrowBreak = choices[Math.floor(Math.random() * choices.length)];
-    if (nextThrowBreak === undefined) {
-      return;
-    }
-    throwBreak = nextThrowBreak;
-    backupRef.current!.src = `video/${
-      isStanding ? "standing" : "grounded"
-    }/${throwBreak}.mkv#${Date.now()}`;
-  };
-
-  var onEnded = () => {};
 
   function Helper(props: { children: ReactNode }) {
+    var throwBreak = "";
+    const [shortcutToSet, updateShortcutToSet] = useState("");
+    const [isP1, updateIsP1] = useState(true);
+    const [isStanding, updateIsStanding] = useState(true);
+    const [possibleThrowBreaks, updatePossibleThrowBreaks] = useState(
+      Object.fromEntries(Object.keys(ALL_MOVES).map((k) => [k, true]))
+    );
+    var timeout: NodeJS.Timeout;
+
+    prepRandom = () => {
+      if (!initialzed) return;
+      clearTimeout(timeout);
+      const choices = Object.entries(possibleThrowBreaks)
+        .map(([k, v]) => ({ k, v }))
+        .filter(({ v }) => v)
+        .map(({ k }) => k);
+      const nextThrowBreak =
+        choices[Math.floor(Math.random() * choices.length)];
+      if (nextThrowBreak === undefined) {
+        return;
+      }
+      throwBreak = nextThrowBreak;
+      backupRef.current!.src = `video/${
+        isStanding ? "standing" : "grounded"
+      }/${throwBreak}.mkv#${Date.now()}`;
+    };
+
     const [_speed, _updateSpeed] = useState(1);
     const updateSpeed = (newSpeed: number) => {
       const video = mainRef.current;
@@ -55,7 +57,7 @@ export default function Main() {
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     useEffect(() => {
-      prepRandom();
+      //   prepRandom();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isP1, isStanding, possibleThrowBreaks]);
     const breakThrow = (button: string) => {
@@ -66,7 +68,7 @@ export default function Main() {
       if (thisFrame < 0) return;
       video.pause();
       const fullThrowBreak = throwBreak.replace("12", "1+2");
-      const incorrect = button !== fullThrowBreak;
+      const incorrect = thisFrame >= 20 || button !== fullThrowBreak;
       updateStreak(incorrect ? 0 : streak + 1);
       updateLastThrowBreak(throwBreak);
       updateLastInput(button);
@@ -77,6 +79,7 @@ export default function Main() {
     return (
       <div
         tabIndex={1}
+        ref={(c) => c?.focus()}
         onKeyDown={(e) => {
           if (shortcutToSet !== "") {
             shortcutToInput[e.key] = shortcutToSet;
