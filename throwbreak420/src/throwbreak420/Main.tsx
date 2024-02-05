@@ -39,7 +39,7 @@ export default function Main() {
       return;
     }
     updateThrowBreak(nextThrowBreak);
-    mainRef.current!.src = `video/${
+    backupRef.current!.src = `video/${
       isStanding ? "standing" : "grounded"
     }/${nextThrowBreak}.mkv#${Date.now()}`;
   };
