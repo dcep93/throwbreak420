@@ -73,7 +73,7 @@ export default function Main() {
       updateLastThrowBreak(throwBreak);
       updateLastInput(button);
       updateFrame(thisFrame);
-      timeout = setTimeout(() => prepRandom(), incorrect ? 2000 : 500);
+      timeout = setTimeout(() => prepRandom(), incorrect ? 3000 : 500);
     };
     onEnded = () => breakThrow("-");
     return (
