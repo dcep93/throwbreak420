@@ -5,7 +5,14 @@ const ALL_MOVES = {
   2: "2 break",
   12: "1+2 break",
 };
-const shortcutToInput: { [k: string]: string } = {};
+const shortcutToInput: { [k: string]: string } = {
+  Digit1: "1",
+  Digit2: "2",
+  Digit3: "1+2",
+  u: "1",
+  i: "2",
+  o: "1+2",
+};
 
 var initialzed = false;
 
@@ -88,8 +95,7 @@ export default function Main() {
             );
             return;
           }
-          const button =
-            { "1": "1", "2": "2", "3": "1+2" }[e.key] || shortcutToInput[e.key];
+          const button = shortcutToInput[e.key];
           if (button === undefined) {
             if (e.metaKey || !e.code.startsWith("Key")) return;
             initialzed = false;
@@ -108,7 +114,8 @@ export default function Main() {
               display: "flex",
               flexDirection: "column",
               fontFamily: "Courier New",
-              // TODO styling
+              color: "#f3f3f8",
+              backgroundColor: "#282a3a",
             }}
           >
             <div>
