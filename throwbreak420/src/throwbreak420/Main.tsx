@@ -7,7 +7,10 @@ const ALL_MOVES = {
 };
 const shortcutToInput: { [k: string]: string } = {};
 
+var initialzed = false;
+
 export default function Main() {
+  console.log("main");
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
   const [shortcutToSet, updateShortcutToSet] = useState("");
@@ -18,13 +21,14 @@ export default function Main() {
     Object.fromEntries(Object.keys(ALL_MOVES).map((k) => [k, true]))
   );
   const [throwBreak, updateThrowBreak] = useState("");
-  const [date, updateDate] = useState(0);
   const [streak, updateStreak] = useState(0);
   const [lastThrowBreak, updateLastThrowBreak] = useState("");
   const [lastInput, updateLastInput] = useState("");
   const [frame, updateFrame] = useState(0);
   var timeout: NodeJS.Timeout;
   const prepRandom = () => {
+    console.log("prepRandom", initialzed);
+    if (!initialzed) return;
     clearTimeout(timeout);
     const choices = Object.entries(possibleThrowBreaks)
       .map(([k, v]) => ({ k, v }))
@@ -34,11 +38,10 @@ export default function Main() {
     if (nextThrowBreak === undefined) {
       return;
     }
-    if (nextThrowBreak === throwBreak) {
-      updateDate(Date.now());
-      return;
-    }
     updateThrowBreak(nextThrowBreak);
+    mainRef.current!.src = `video/${
+      isStanding ? "standing" : "grounded"
+    }/${nextThrowBreak}.mkv#${Date.now()}`;
   };
   useEffect(() => {
     prepRandom();
@@ -192,15 +195,7 @@ export default function Main() {
             <div>streak: {streak}</div>
           </div>
           <div style={{ flexGrow: 1, position: "relative" }}>
-            <Video
-              src={`video/${
-                isStanding ? "standing" : "grounded"
-              }/${throwBreak}.mkv#${date}`}
-              mainRef={mainRef}
-              backupRef={backupRef}
-              onEnded={() => breakThrow("-")}
-              speed={speed}
-            />
+            <Video />
           </div>
           <div style={{ display: "flex", justifyContent: "space-around" }}>
             {["1", "2", "1+2"].map((k) => (
@@ -218,43 +213,46 @@ export default function Main() {
       )}
     </div>
   );
-}
 
-function Video(props: {
-  src: string;
-  mainRef: React.RefObject<HTMLVideoElement>;
-  backupRef: React.RefObject<HTMLVideoElement>;
-  onEnded: () => void;
-  speed: number;
-}) {
-  return (
-    <div style={{ height: "100%", display: "flex", justifyContent: "center" }}>
-      <video
-        ref={props.mainRef}
-        style={{
-          position: "absolute",
-          height: "100%",
-          maxWidth: "100%",
-          zIndex: 1,
-        }}
-        autoPlay
-        muted
-        onEnded={() => props.onEnded()}
-      ></video>
-      <video
-        src={props.src}
-        ref={props.backupRef}
-        style={{
-          position: "absolute",
-          height: "100%",
-          maxWidth: "100%",
-        }}
-        onCanPlay={(e) => {
-          const video = props.mainRef.current!;
-          video.src = (e.target as HTMLVideoElement).src;
-          video.playbackRate = props.speed; // TODO make not necessary cuz we dont rerender!
-        }}
-      ></video>
-    </div>
-  );
+  function Video() {
+    console.log("video");
+    return (
+      <div
+        style={{ height: "100%", display: "flex", justifyContent: "center" }}
+      >
+        <video
+          ref={mainRef}
+          style={{
+            position: "absolute",
+            height: "100%",
+            maxWidth: "100%",
+            zIndex: 1,
+          }}
+          autoPlay
+          muted
+          onEnded={() => breakThrow("-")}
+        ></video>
+        <video
+          src={`video/blank-0.2-sec.mkv`}
+          ref={backupRef}
+          style={{
+            position: "absolute",
+            height: "100%",
+            maxWidth: "100%",
+          }}
+          onCanPlay={(e) => {
+            console.log("canPlay", (e.target as HTMLVideoElement).src);
+            if (!initialzed) {
+              initialzed = true;
+              prepRandom();
+              return;
+            }
+            const video = mainRef.current!;
+            video.src = (e.target as HTMLVideoElement).src;
+            video.playbackRate = speed; // TODO make not necessary cuz we dont rerender!
+          }}
+        ></video>
+      </div>
+    );
+  }
 }
