@@ -10,8 +10,8 @@ const shortcutToInput: { [k: string]: string } = {};
 var initialzed = false;
 
 export default function Main() {
-  console.log("main");
   var throwBreak = "";
+  var speed = 1;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
   const [shortcutToSet, updateShortcutToSet] = useState("");
@@ -23,7 +23,6 @@ export default function Main() {
   var timeout: NodeJS.Timeout;
 
   const prepRandom = () => {
-    console.log("prepRandom", initialzed);
     if (!initialzed) return;
     clearTimeout(timeout);
     const choices = Object.entries(possibleThrowBreaks)
@@ -43,14 +42,13 @@ export default function Main() {
   var onEnded = () => {};
 
   function Helper(props: { children: ReactNode }) {
-    console.log("helper");
-    const [speed, _updateSpeed] = useState(1);
+    const [_speed, _updateSpeed] = useState(1);
     const updateSpeed = (newSpeed: number) => {
       const video = mainRef.current;
       if (!video) return;
-      newSpeed = parseFloat(newSpeed.toFixed(2));
-      video.playbackRate = newSpeed;
-      _updateSpeed(newSpeed);
+      speed = parseFloat(newSpeed.toFixed(2));
+      video.playbackRate = speed;
+      _updateSpeed(speed);
     };
     const [streak, updateStreak] = useState(0);
     const [lastThrowBreak, updateLastThrowBreak] = useState("");
@@ -184,7 +182,7 @@ export default function Main() {
                   ))}
                 </div>
                 <div>
-                  <div>speed: {speed.toFixed(2)}</div>
+                  <div>speed: {_speed.toFixed(2)}</div>
                   <div>
                     <button
                       disabled={speed <= 0.2}
@@ -230,7 +228,6 @@ export default function Main() {
   }
 
   function Video() {
-    console.log("video");
     return (
       <div
         style={{ height: "100%", display: "flex", justifyContent: "center" }}
@@ -256,7 +253,6 @@ export default function Main() {
             maxWidth: "100%",
           }}
           onCanPlay={(e) => {
-            console.log("canPlay", (e.target as HTMLVideoElement).src);
             if (!initialzed) {
               initialzed = true;
               prepRandom();
@@ -264,7 +260,7 @@ export default function Main() {
             }
             const video = mainRef.current!;
             video.src = (e.target as HTMLVideoElement).src;
-            // video.playbackRate = speed; // TODO make not necessary cuz we dont rerender!
+            video.playbackRate = speed;
           }}
         ></video>
       </div>
