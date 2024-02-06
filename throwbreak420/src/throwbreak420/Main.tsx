@@ -257,7 +257,7 @@ export default function Main() {
           onEnded={onEnded}
         ></video>
         <video
-          src={`video/blank-0.2-sec.mkv`}
+          src={`video/blank.mp4`}
           ref={backupRef}
           style={{
             position: "absolute",
