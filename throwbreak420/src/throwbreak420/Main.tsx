@@ -119,6 +119,7 @@ export default function Main() {
               backgroundColor: "#282a3a",
             }}
           >
+            <div>debugging</div>
             <div>
               <form
                 style={{ display: "flex", justifyContent: "space-around" }}
