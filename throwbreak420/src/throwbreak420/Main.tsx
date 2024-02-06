@@ -48,7 +48,7 @@ export default function Main() {
       throwBreak = nextThrowBreak;
       backupRef.current!.src = `video/${
         isStanding ? "standing" : "grounded"
-      }/${throwBreak}.mkv#${Date.now()}`;
+      }/${throwBreak}.mp4#${Date.now()}`;
     };
 
     const [_speed, _updateSpeed] = useState(1);
