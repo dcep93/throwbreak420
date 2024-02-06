@@ -264,7 +264,7 @@ export default function Main() {
             height: "100%",
             maxWidth: "100%",
           }}
-          onError={(e) => alert("err")}
+          onError={(e) => alert((e.target as any).error.message)}
           onCanPlay={(e) => {
             alert(initialzed);
             if (!initialzed) {
