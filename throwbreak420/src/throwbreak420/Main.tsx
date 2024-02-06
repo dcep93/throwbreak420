@@ -264,7 +264,9 @@ export default function Main() {
             height: "100%",
             maxWidth: "100%",
           }}
+          onError={(e) => alert("err")}
           onCanPlay={(e) => {
+            alert(initialzed);
             if (!initialzed) {
               initialzed = true;
               prepRandom();
