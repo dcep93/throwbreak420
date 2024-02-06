@@ -119,7 +119,6 @@ export default function Main() {
               backgroundColor: "#282a3a",
             }}
           >
-            <div>debugging</div>
             <div>
               <form
                 style={{ display: "flex", justifyContent: "space-around" }}
@@ -265,9 +264,7 @@ export default function Main() {
             height: "100%",
             maxWidth: "100%",
           }}
-          onError={(e) => alert((e.target as any).error.message)}
           onCanPlay={(e) => {
-            alert(initialzed);
             if (!initialzed) {
               initialzed = true;
               prepRandom();
