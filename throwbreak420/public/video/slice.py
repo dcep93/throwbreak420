@@ -5,12 +5,12 @@ import numpy
 # 1:   0:01-0:04 grounded/1.mkv 110 200
 # 2:   0:08-0:11 grounded/2.mkv 528 618
 # 1+2: 0:13-0:16 grounded/12.mkv 836 926
-# standing 66
-# 1:   1:20-1:27 standing/1.mkv 4855 5060
-# 2:   0:54-1:01 standing/2.mkv 3326 3531
-# 1+2: 1:00-1:06 standing/12.mkv 3745 3950
+# standing 60
+# 1:   1:20-1:27 standing/1.mkv 4861 5060
+# 2:   0:54-1:01 standing/2.mkv 3332 3531
+# 1+2: 1:00-1:06 standing/12.mkv 3751 3950
 
-# filename=grounded/1.mkv; start_frame=110; end_frame=200; ffmpeg -i raw.mkv -vf "select=between(n\,$start_frame\,$end_frame),setpts=PTS-STARTPTS" -af "aselect=between(n\,$start_frame\,$end_frame),asetpts=PTS-STARTPTS" $filename
+# filename=standing/12.mkv; start_frame=3751; end_frame=3950; ffmpeg -i raw.mkv -vf "select=between(n\,$start_frame\,$end_frame),setpts=PTS-STARTPTS" -af "aselect=between(n\,$start_frame\,$end_frame),asetpts=PTS-STARTPTS" $filename
 
 
 def main():
