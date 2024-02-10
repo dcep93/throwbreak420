@@ -46,9 +46,11 @@ export default function Main() {
         return;
       }
       throwBreak = nextThrowBreak;
-      backupRef.current!.src = `video/${
-        isStanding ? "standing" : "grounded"
-      }/${throwBreak}.mp4#${Date.now()}`;
+      fetch(`video/${isStanding ? "standing" : "grounded"}/${throwBreak}.mp4`)
+        .then((response) => response.blob())
+        .then((blob) => {
+          backupRef.current!.src = window.URL.createObjectURL(blob);
+        });
     };
 
     const [_speed, _updateSpeed] = useState(1);
@@ -252,6 +254,7 @@ export default function Main() {
             maxWidth: "100%",
             zIndex: 1,
           }}
+          playsInline
           autoPlay
           muted
           onEnded={onEnded}
@@ -264,14 +267,18 @@ export default function Main() {
             height: "100%",
             maxWidth: "100%",
           }}
+          autoPlay
+          playsInline
           onCanPlay={(e) => {
+            const t = backupRef.current!;
+            t.pause();
             if (!initialzed) {
               initialzed = true;
               prepRandom();
               return;
             }
             const video = mainRef.current!;
-            video.src = (e.target as HTMLVideoElement).src;
+            video.src = t.src;
             video.playbackRate = speed;
           }}
         ></video>
