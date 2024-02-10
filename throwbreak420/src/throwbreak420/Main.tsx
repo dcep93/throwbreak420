@@ -20,7 +20,7 @@ export default function Main() {
   var prepRandom = () => {};
   var onEnded = () => {};
   var speed = 1;
-  var throwBreak = "";
+  var throwBreak: string | null = null;
   var timeout: NodeJS.Timeout;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
@@ -72,11 +72,13 @@ export default function Main() {
     const breakThrow = (button: string) => {
       const video = mainRef.current;
       if (!video) return;
+      if (throwBreak === null) return;
       const rawFrame = Math.ceil(video.currentTime * 60);
       const thisFrame = rawFrame - 66;
       if (thisFrame < 0) return;
       video.pause();
       const fullThrowBreak = throwBreak.replace("12", "1+2");
+      throwBreak = null;
       const incorrect = thisFrame >= 20 || button !== fullThrowBreak;
       updateStreak(incorrect ? 0 : streak + 1);
       updateLastThrowBreak(fullThrowBreak);
@@ -269,7 +271,7 @@ export default function Main() {
           }}
           autoPlay
           playsInline
-          onCanPlay={(e) => {
+          onCanPlay={() => {
             const t = backupRef.current!;
             t.pause();
             if (!initialzed) {
