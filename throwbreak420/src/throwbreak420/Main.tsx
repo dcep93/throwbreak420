@@ -26,14 +26,59 @@ const shortcutToInput: { [k: string]: string } = {
 var initialzed = false;
 
 export default function Main() {
-  var prepRandom = () => {};
+  var prepVideo = () => {};
   var onEnded = () => {};
   var speed = 1;
   var chosenKey: string | null = null;
   var timeout: NodeJS.Timeout;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
-  var nextStreak = 0;
+  var streak = 0;
+
+  function Video() {
+    return (
+      <div
+        style={{ height: "100%", display: "flex", justifyContent: "center" }}
+      >
+        <video
+          ref={mainRef}
+          style={{
+            position: "absolute",
+            height: "100%",
+            maxWidth: "100%",
+            zIndex: 1,
+          }}
+          playsInline
+          autoPlay
+          muted
+          onEnded={onEnded}
+        ></video>
+        <video
+          src={`video/blank.mp4`}
+          ref={backupRef}
+          style={{
+            position: "absolute",
+            height: "100%",
+            maxWidth: "100%",
+          }}
+          autoPlay
+          playsInline
+          onCanPlay={() => {
+            const t = backupRef.current!;
+            t.pause();
+            if (!initialzed) {
+              initialzed = true;
+              prepVideo();
+              return;
+            }
+            const video = mainRef.current!;
+            video.src = t.src;
+            video.playbackRate = speed;
+          }}
+        ></video>
+      </div>
+    );
+  }
 
   function Helper(props: { children: ReactNode }) {
     const [shortcutToSet, updateShortcutToSet] = useState("");
@@ -42,13 +87,13 @@ export default function Main() {
     const getPossibles = (c: string) =>
       Object.fromEntries(Object.keys(ALL_MOVES[c]).map((k) => [k, true]));
     const updateCategory = (c: string) => {
-      nextStreak = 0;
+      streak = 0;
       _updateCategory(c);
       updatePossibles(getPossibles(c));
     };
     const [possibles, updatePossibles] = useState(getPossibles(category));
 
-    prepRandom = () => {
+    prepVideo = () => {
       if (!initialzed) return;
       clearTimeout(timeout);
       const choices = Object.entries(possibles)
@@ -59,7 +104,7 @@ export default function Main() {
       if (nextChoice === undefined) {
         return;
       }
-      updateStreak(nextStreak);
+      updateStreak(streak);
       chosenKey = nextChoice;
       fetch(`video/${ALL_MOVES[category][chosenKey].path}`)
         .then((response) => response.blob())
@@ -76,12 +121,12 @@ export default function Main() {
       video.playbackRate = speed;
       _updateSpeed(speed);
     };
-    const [streak, updateStreak] = useState(nextStreak);
+    const [_streak, updateStreak] = useState(streak);
     const [lastAnswer, updateLastAnswer] = useState("");
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     useEffect(() => {
-      prepRandom();
+      prepVideo();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isP1, category, possibles]);
     const handleInput = (button: string) => {
@@ -94,13 +139,13 @@ export default function Main() {
       if (thisFrame < 0) return;
       video.pause();
       const incorrect = thisFrame >= 20 || button !== obj.answer;
-      nextStreak = incorrect ? 0 : nextStreak + 1;
-      if (!incorrect) updateStreak(nextStreak);
+      streak = incorrect ? 0 : streak + 1;
+      if (!incorrect) updateStreak(streak);
       updateLastAnswer(obj.answer);
       updateLastInput(button);
       updateFrame(thisFrame);
       chosenKey = null;
-      timeout = setTimeout(() => prepRandom(), incorrect ? 2000 : 250);
+      timeout = setTimeout(() => prepVideo(), incorrect ? 2000 : 250);
     };
     onEnded = () => handleInput("-");
     return (
@@ -231,7 +276,7 @@ export default function Main() {
                 <div>answer: {lastAnswer}</div>
                 <div>input: {lastInput}</div>
                 <div>frame: {frame}</div>
-                <div>streak: {streak}</div>
+                <div>streak: {_streak}</div>
               </div>
               <div style={{ flexGrow: 1, position: "relative" }}>
                 {props.children}
@@ -277,6 +322,7 @@ export default function Main() {
                 <li>
                   TODO{" "}
                   <ul>
+                    <li>cache clips before playing</li>
                     <li>p1/p2</li>
                     <li>random intervals</li>
                   </ul>
@@ -285,51 +331,6 @@ export default function Main() {
             </div>
           </div>
         )}
-      </div>
-    );
-  }
-
-  function Video() {
-    return (
-      <div
-        style={{ height: "100%", display: "flex", justifyContent: "center" }}
-      >
-        <video
-          ref={mainRef}
-          style={{
-            position: "absolute",
-            height: "100%",
-            maxWidth: "100%",
-            zIndex: 1,
-          }}
-          playsInline
-          autoPlay
-          muted
-          onEnded={onEnded}
-        ></video>
-        <video
-          src={`video/blank.mp4`}
-          ref={backupRef}
-          style={{
-            position: "absolute",
-            height: "100%",
-            maxWidth: "100%",
-          }}
-          autoPlay
-          playsInline
-          onCanPlay={() => {
-            const t = backupRef.current!;
-            t.pause();
-            if (!initialzed) {
-              initialzed = true;
-              prepRandom();
-              return;
-            }
-            const video = mainRef.current!;
-            video.src = t.src;
-            video.playbackRate = speed;
-          }}
-        ></video>
       </div>
     );
   }
