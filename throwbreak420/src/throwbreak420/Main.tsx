@@ -1,9 +1,18 @@
 import { ReactNode, createRef, useEffect, useState } from "react";
 
-const ALL_MOVES = {
-  1: "1 break",
-  2: "2 break",
-  12: "1+2 break",
+const ALL_MOVES: {
+  [c: string]: { [k: string]: { name: string; answer: string; path: string } };
+} = {
+  standing: {
+    1: { name: "1 break", answer: "1", path: "standing/1.mp4" },
+    2: { name: "2 break", answer: "2", path: "standing/2.mp4" },
+    12: { name: "1+2 break", answer: "1+2", path: "standing/12.mp4" },
+  },
+  grounded: {
+    1: { name: "1 break", answer: "1", path: "grounded/1.mp4" },
+    2: { name: "2 break", answer: "2", path: "grounded/2.mp4" },
+    12: { name: "1+2 break", answer: "1+2", path: "grounded/12.mp4" },
+  },
 };
 const shortcutToInput: { [k: string]: string } = {
   1: "1",
@@ -20,7 +29,7 @@ export default function Main() {
   var prepRandom = () => {};
   var onEnded = () => {};
   var speed = 1;
-  var throwBreak: string | null = null;
+  var chosenKey: string | null = null;
   var timeout: NodeJS.Timeout;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
@@ -28,25 +37,28 @@ export default function Main() {
   function Helper(props: { children: ReactNode }) {
     const [shortcutToSet, updateShortcutToSet] = useState("");
     const [isP1, updateIsP1] = useState(true);
-    const [isStanding, updateIsStanding] = useState(true);
-    const [possibleThrowBreaks, updatePossibleThrowBreaks] = useState(
-      Object.fromEntries(Object.keys(ALL_MOVES).map((k) => [k, true]))
-    );
+    const [category, _updateCategory] = useState(Object.keys(ALL_MOVES)[0]);
+    const getPossibles = (c: string) =>
+      Object.fromEntries(Object.keys(ALL_MOVES[c]).map((k) => [k, true]));
+    const updateCategory = (c: string) => {
+      _updateCategory(c);
+      updatePossibles(getPossibles(c));
+    };
+    const [possibles, updatePossibles] = useState(getPossibles(category));
 
     prepRandom = () => {
       if (!initialzed) return;
       clearTimeout(timeout);
-      const choices = Object.entries(possibleThrowBreaks)
+      const choices = Object.entries(possibles)
         .map(([k, v]) => ({ k, v }))
         .filter(({ v }) => v)
         .map(({ k }) => k);
-      const nextThrowBreak =
-        choices[Math.floor(Math.random() * choices.length)];
-      if (nextThrowBreak === undefined) {
+      const nextChoice = choices[Math.floor(Math.random() * choices.length)];
+      if (nextChoice === undefined) {
         return;
       }
-      throwBreak = nextThrowBreak;
-      fetch(`video/${isStanding ? "standing" : "grounded"}/${throwBreak}.mp4`)
+      chosenKey = nextChoice;
+      fetch(`video/${ALL_MOVES[category][chosenKey].path}`)
         .then((response) => response.blob())
         .then((blob) => {
           backupRef.current!.src = window.URL.createObjectURL(blob);
@@ -62,31 +74,31 @@ export default function Main() {
       _updateSpeed(speed);
     };
     const [streak, updateStreak] = useState(0);
-    const [lastThrowBreak, updateLastThrowBreak] = useState("");
+    const [lastAnswer, updateLastAnswer] = useState("");
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     useEffect(() => {
       prepRandom();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isP1, isStanding, possibleThrowBreaks]);
-    const breakThrow = (button: string) => {
+    }, [isP1, category, possibles]);
+    const handleInput = (button: string) => {
       const video = mainRef.current;
       if (!video) return;
-      if (throwBreak === null) return;
+      if (chosenKey === null) return;
+      const obj = ALL_MOVES[category][chosenKey];
       const rawFrame = Math.ceil(video.currentTime * 60);
       const thisFrame = rawFrame - 66;
       if (thisFrame < 0) return;
       video.pause();
-      const fullThrowBreak = throwBreak.replace("12", "1+2");
-      throwBreak = null;
-      const incorrect = thisFrame >= 20 || button !== fullThrowBreak;
+      const incorrect = thisFrame >= 20 || button !== obj.answer;
       updateStreak(incorrect ? 0 : streak + 1);
-      updateLastThrowBreak(fullThrowBreak);
+      updateLastAnswer(chosenKey);
       updateLastInput(button);
       updateFrame(thisFrame);
-      timeout = setTimeout(() => prepRandom(), incorrect ? 3000 : 500);
+      chosenKey = null;
+      timeout = setTimeout(() => prepRandom(), incorrect ? 2000 : 250);
     };
-    onEnded = () => breakThrow("-");
+    onEnded = () => handleInput("-");
     return (
       <div
         tabIndex={1}
@@ -106,7 +118,7 @@ export default function Main() {
             updateShortcutToSet("1");
             return;
           }
-          breakThrow(button);
+          handleInput(button);
         }}
       >
         {shortcutToSet !== "" ? (
@@ -154,45 +166,36 @@ export default function Main() {
                   </div>
                 </div>
                 <div>
-                  <div>
-                    <label>
-                      <input
-                        type="radio"
-                        name="grounded"
-                        checked={isStanding}
-                        onChange={() => updateIsStanding(true)}
-                      />
-                      standing
-                    </label>
-                  </div>
-                  <div>
-                    <label>
-                      <input
-                        type="radio"
-                        name="grounded"
-                        checked={!isStanding}
-                        onChange={() => updateIsStanding(false)}
-                      />
-                      grounded
-                    </label>
-                  </div>
+                  {Object.keys(ALL_MOVES).map((c) => (
+                    <div key={c}>
+                      <label>
+                        <input
+                          type="radio"
+                          name="category"
+                          checked={c === category}
+                          onChange={() => updateCategory(c)}
+                        />
+                        {c}
+                      </label>
+                    </div>
+                  ))}
                 </div>
                 <div>
-                  {Object.entries(ALL_MOVES).map(([k, v]) => (
+                  {Object.entries(possibles).map(([k, v]) => (
                     <div key={k}>
                       <label>
                         <input
                           type={"checkbox"}
-                          checked={possibleThrowBreaks[k]}
+                          checked={v}
                           onChange={() =>
-                            updatePossibleThrowBreaks(
-                              Object.assign({}, possibleThrowBreaks, {
-                                [k]: !possibleThrowBreaks[k],
+                            updatePossibles(
+                              Object.assign({}, possibles, {
+                                [k]: !v,
                               })
                             )
                           }
                         />
-                        {v}
+                        {ALL_MOVES[category][k].name}
                       </label>
                     </div>
                   ))}
@@ -217,7 +220,7 @@ export default function Main() {
               </form>
             </div>
             <div style={{ paddingLeft: "2em" }}>
-              <div>throw: {lastThrowBreak}</div>
+              <div>answer: {lastAnswer}</div>
               <div>input: {lastInput}</div>
               <div>frame: {frame}</div>
               <div>streak: {streak}</div>
@@ -230,7 +233,7 @@ export default function Main() {
                 <div key={k}>
                   <button
                     style={{ padding: "1em", fontSize: "xx-large" }}
-                    onClick={() => breakThrow(k)}
+                    onClick={() => handleInput(k)}
                   >
                     {k}
                   </button>
