@@ -33,6 +33,7 @@ export default function Main() {
   var timeout: NodeJS.Timeout;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
+  var nextStreak = 0;
 
   function Helper(props: { children: ReactNode }) {
     const [shortcutToSet, updateShortcutToSet] = useState("");
@@ -41,6 +42,7 @@ export default function Main() {
     const getPossibles = (c: string) =>
       Object.fromEntries(Object.keys(ALL_MOVES[c]).map((k) => [k, true]));
     const updateCategory = (c: string) => {
+      nextStreak = 0;
       _updateCategory(c);
       updatePossibles(getPossibles(c));
     };
@@ -74,7 +76,6 @@ export default function Main() {
       video.playbackRate = speed;
       _updateSpeed(speed);
     };
-    var nextStreak = 0;
     const [streak, updateStreak] = useState(nextStreak);
     const [lastAnswer, updateLastAnswer] = useState("");
     const [lastInput, updateLastInput] = useState("");
@@ -93,8 +94,9 @@ export default function Main() {
       if (thisFrame < 0) return;
       video.pause();
       const incorrect = thisFrame >= 20 || button !== obj.answer;
-      nextStreak = incorrect ? 0 : streak + 1;
-      updateLastAnswer(chosenKey);
+      nextStreak = incorrect ? 0 : nextStreak + 1;
+      if (!incorrect) updateStreak(nextStreak);
+      updateLastAnswer(obj.answer);
       updateLastInput(button);
       updateFrame(thisFrame);
       chosenKey = null;
