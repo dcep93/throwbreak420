@@ -57,6 +57,7 @@ export default function Main() {
       if (nextChoice === undefined) {
         return;
       }
+      updateStreak(nextStreak);
       chosenKey = nextChoice;
       fetch(`video/${ALL_MOVES[category][chosenKey].path}`)
         .then((response) => response.blob())
@@ -73,7 +74,8 @@ export default function Main() {
       video.playbackRate = speed;
       _updateSpeed(speed);
     };
-    const [streak, updateStreak] = useState(0);
+    var nextStreak = 0;
+    const [streak, updateStreak] = useState(nextStreak);
     const [lastAnswer, updateLastAnswer] = useState("");
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
@@ -91,7 +93,7 @@ export default function Main() {
       if (thisFrame < 0) return;
       video.pause();
       const incorrect = thisFrame >= 20 || button !== obj.answer;
-      updateStreak(incorrect ? 0 : streak + 1);
+      nextStreak = incorrect ? 0 : streak + 1;
       updateLastAnswer(chosenKey);
       updateLastInput(button);
       updateFrame(thisFrame);
