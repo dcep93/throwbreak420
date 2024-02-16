@@ -138,7 +138,7 @@ export default function Main() {
       const thisFrame = rawFrame - 66;
       if (thisFrame < 0) return;
       video.pause();
-      const incorrect = thisFrame >= 20 || button !== obj.answer;
+      const incorrect = thisFrame > 20 || button !== obj.answer;
       streak = incorrect ? 0 : streak + 1;
       if (!incorrect) updateStreak(streak);
       updateLastAnswer(obj.answer);
