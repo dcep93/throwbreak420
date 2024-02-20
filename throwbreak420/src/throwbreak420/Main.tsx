@@ -240,7 +240,7 @@ export default function Main() {
                 <ul>
                   <li>control speed</li>
                   <li>
-                    see which frame you pressed - were you close? throw have a
+                    see which frame you pressed - were you close? throws have a
                     20 frame break window
                   </li>
                   <li>practice on any browser, even mobile</li>
