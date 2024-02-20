@@ -230,6 +230,14 @@ export default function Main() {
                 >
                   click here to continue
                 </h3>
+                <a
+                  style={{ color: "white" }}
+                  href={
+                    "https://www.reddit.com/r/Tekken/comments/1avreg9/announcing_throwbreak420_an_online_tool/?"
+                  }
+                >
+                  reddit post
+                </a>
                 <p>
                   if you're like me, breaking a throw in a match is impossible,
                   and even in practice mode, it's too fast and subtle to
