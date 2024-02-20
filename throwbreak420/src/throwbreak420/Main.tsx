@@ -225,7 +225,7 @@ export default function Main() {
                   margin: "auto",
                 }}
               >
-                <h1>ThrowBreak420</h1>
+                <h1>ThrowBreak420 v{VERSION}</h1>
                 <h3>click anywhere to continue</h3>
                 <p>
                   if you're like me, breaking a throw in a match is impossible,
