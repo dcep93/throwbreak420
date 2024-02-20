@@ -16,6 +16,8 @@ const shortcutToInput: { [k: string]: string } = {
   o: "1+2",
 };
 
+const videoCache: { [p: string]: string } = {};
+
 var initialzed = false;
 var prepVideo = () => {};
 var onEnded = () => {};
@@ -82,31 +84,6 @@ export default function Main() {
       "2": true,
       "1+2": true,
     });
-
-    prepVideo = () => {
-      if (!initialzed) return;
-      clearTimeout(timeout);
-      const choices = Object.entries(possibles)
-        .map(([k, v]) => ({ k, v }))
-        .filter(({ v }) => v)
-        .map(({ k }) => k);
-      const nextChoice = choices[Math.floor(Math.random() * choices.length)];
-      if (nextChoice === undefined) {
-        return;
-      }
-      updateStreak(nextStreak);
-      answer = nextChoice;
-      fetch(
-        `video/${isP1 ? "p1" : "p2"}/${
-          isStanding ? "standing" : "grounded"
-        }/${answer.replace("+", "")}.mp4`
-      )
-        .then((response) => response.blob())
-        .then((blob) => {
-          backupRef.current!.src = window.URL.createObjectURL(blob);
-        });
-    };
-
     const [speed, _updateSpeed] = useState(1);
     const updateSpeed = (newSpeed: number) => {
       const video = mainRef.current;
@@ -120,6 +97,46 @@ export default function Main() {
     const [lastAnswer, updateLastAnswer] = useState("");
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
+    const [isLoading, updateIsLoading] = useState(false);
+
+    const getPath = (choice: string) =>
+      `video/${isP1 ? "p1" : "p2"}/${
+        isStanding ? "standing" : "grounded"
+      }/${choice.replace("+", "")}.mp4`;
+
+    prepVideo = () => {
+      if (!initialzed) return;
+      clearTimeout(timeout);
+      const choices = Object.entries(possibles)
+        .map(([k, v]) => ({ k, v }))
+        .filter(({ v }) => v)
+        .map(({ k }) => k);
+      const missing = choices
+        .map((choice) => getPath(choice))
+        .filter((p) => videoCache[p] === undefined);
+      if (missing.length > 0) {
+        updateIsLoading(true);
+        Promise.all(
+          missing.map((p) =>
+            fetch(p)
+              .then((r) => r.blob())
+              .then((blob) => window.URL.createObjectURL(blob))
+              .then((src) => (videoCache[p] = src))
+          )
+        )
+          .then(() => updateIsLoading(false))
+          .then(() => prepVideo());
+        return;
+      }
+      const nextChoice = choices[Math.floor(Math.random() * choices.length)];
+      if (nextChoice === undefined) {
+        return;
+      }
+      updateStreak(nextStreak);
+      answer = nextChoice;
+      backupRef.current!.src = videoCache[getPath(nextChoice)];
+    };
+
     useEffect(() => {
       nextStreak = 0;
       prepVideo();
@@ -311,8 +328,7 @@ export default function Main() {
                   TODO{" "}
                   <ul>
                     <li>better user guide</li>
-                    <li>cache clips before playing</li>
-                    <li>random intervals</li>
+                    <li>mention random intervals</li>
                   </ul>
                 </li>
               </ul>
