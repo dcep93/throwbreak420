@@ -284,7 +284,10 @@ export default function Main() {
                 <div>streak: {streak}</div>
               </div>
               <div style={{ flexGrow: 1, position: "relative" }}>
-                {props.children}
+                {isLoading ? (
+                  <h1 style={{ textAlign: "center" }}>LOADING...</h1>
+                ) : null}
+                <div hidden={isLoading}>{props.children}</div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-around" }}>
                 {Object.keys(possibles).map((k) => (
