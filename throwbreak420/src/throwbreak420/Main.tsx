@@ -100,9 +100,17 @@ export default function Main() {
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     const [isLoading, updateIsLoading] = useState(false);
-    const [userGuideIsOpen, updateUserGuideIsOpen] = useState(
-      localStorage.getItem("") || "" >= VERSION
+    const [userGuideIsOpen, _updateUserGuideIsOpen] = useState(
+      VERSION > (localStorage.getItem("") || "")
     );
+    const updateUserGuideIsOpen = (_userGuideIsOpen: boolean) => {
+      localStorage.setItem("", _userGuideIsOpen ? "" : VERSION);
+      _updateUserGuideIsOpen(_userGuideIsOpen);
+      if (initialzed) {
+        // @ts-ignore
+        window.location.reload(true);
+      }
+    };
 
     const getPath = (choice: string) =>
       `video/${isP1 ? "p1" : "p2"}/${
@@ -193,183 +201,199 @@ export default function Main() {
           }
           handleInput(button);
         }}
+        style={{
+          fontFamily: "Courier New",
+          color: "#f3f3f8",
+          backgroundColor: "#282a3a",
+          height: "100vH",
+          width: "100vW",
+          display: "flex",
+        }}
       >
-        {shortcutToSet !== "" ? (
+        {userGuideIsOpen ? (
+          <div
+            onClick={() => updateUserGuideIsOpen(false)}
+            style={{
+              width: "100%",
+              display: "flex",
+            }}
+          >
+            <div style={{ alignSelf: "center", flexGrow: 1 }}>
+              <div
+                style={{
+                  maxWidth: "40em",
+                  margin: "auto",
+                }}
+              >
+                <h1>ThrowBreak420</h1>
+                <h3>click anywhere to continue</h3>
+                <p>
+                  if you're like me, breaking a throw in a match is impossible,
+                  and even in practice mode, it's too fast and subtle to
+                  distinguish which arm it was!
+                </p>
+                <p>
+                  this tool has several features to train us stoners on how to
+                  recognize throws, and maybe someday, we will be able to
+                  consitently break them in a match
+                </p>
+                <ul>
+                  <li>control speed</li>
+                  <li>
+                    see which frame you pressed - were you close? throw have a
+                    20 frame break window
+                  </li>
+                  <li>practice on any browser, even mobile</li>
+                  <li>record your streak, brag to your wife's boyfriend</li>
+                  <li>
+                    ideally, there would be a random delay before the throw is
+                    done, but it hasn't been implemented yet
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        ) : shortcutToSet !== "" ? (
           <div>set button {shortcutToSet}</div>
         ) : (
           <div
             style={{
-              fontFamily: "Courier New",
-              color: "#f3f3f8",
-              backgroundColor: "#282a3a",
+              flexGrow: 1,
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            <div
-              style={{
-                height: "100vH",
-                width: "100vW",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div>
-                <form
-                  style={{ display: "flex", justifyContent: "space-around" }}
-                  onSubmit={(e) => e.preventDefault()}
-                >
-                  <div>
-                    {[true, false].map((t) => (
-                      <div key={t ? "t" : "f"}>
-                        <label>
-                          <input
-                            type="radio"
-                            name="isP1"
-                            checked={t === isP1}
-                            onChange={() => updateIsP1(t)}
-                          />
-                          {t ? "p1" : "p2"}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    {[true, false].map((t) => (
-                      <div key={t ? "t" : "f"}>
-                        <label>
-                          <input
-                            type="radio"
-                            name="isStanding"
-                            checked={t === isStanding}
-                            onChange={() => updateIsStanding(t)}
-                          />
-                          {t ? "standing" : "grounded"}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    {Object.entries(possibles).map(([k, v]) => (
-                      <div key={k}>
-                        <label>
-                          <input
-                            type={"checkbox"}
-                            checked={v}
-                            onChange={() =>
-                              updatePossibles(
-                                Object.assign({}, possibles, {
-                                  [k]: !v,
-                                })
-                              )
-                            }
-                          />
-                          {k} break
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    <div>speed: {speed.toFixed(2)}</div>
-                    <div>
-                      <button
-                        disabled={speed <= 0.2}
-                        onClick={() => updateSpeed(speed - 0.05)}
-                      >
-                        ➖
-                      </button>
-                      <button
-                        disabled={speed >= 2}
-                        onClick={() => updateSpeed(speed + 0.05)}
-                      >
-                        ➕
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-              <div
-                style={{
-                  flexGrow: 1,
-                }}
+            <div>
+              <form
+                style={{ display: "flex", justifyContent: "space-around" }}
+                onSubmit={(e) => e.preventDefault()}
               >
-                {isLoading ? (
-                  <h1 style={{ textAlign: "center" }}>LOADING...</h1>
-                ) : null}
-                <div
-                  className={css.dual_center}
-                  style={{
-                    opacity: isLoading ? 0 : undefined,
-                    height: "100%",
-                    width: "100%",
-                    display: "flex",
-                  }}
-                >
-                  <div
-                    style={{
-                      paddingLeft: "2em",
-                      width: "8em",
-                    }}
-                  >
-                    <div>answer: {lastAnswer}</div>
-                    <div>input: {lastInput}</div>
-                    <div>frame: {frame}</div>
-                    <div>streak: {streak}</div>
-                  </div>
-                  <div
-                    style={{
-                      flexGrow: 1,
-                      position: "relative",
-                    }}
-                  >
-                    {props.children}
-                  </div>
+                <div>
+                  {[true, false].map((t) => (
+                    <div key={t ? "t" : "f"}>
+                      <label>
+                        <input
+                          type="radio"
+                          name="isP1"
+                          checked={t === isP1}
+                          onChange={() => updateIsP1(t)}
+                        />
+                        {t ? "p1" : "p2"}
+                      </label>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-around" }}>
-                {Object.keys(possibles).map((k) => (
-                  <div key={k}>
+                <div>
+                  {[true, false].map((t) => (
+                    <div key={t ? "t" : "f"}>
+                      <label>
+                        <input
+                          type="radio"
+                          name="isStanding"
+                          checked={t === isStanding}
+                          onChange={() => updateIsStanding(t)}
+                        />
+                        {t ? "standing" : "grounded"}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  {Object.entries(possibles).map(([k, v]) => (
+                    <div key={k}>
+                      <label>
+                        <input
+                          type={"checkbox"}
+                          checked={v}
+                          onChange={() =>
+                            updatePossibles(
+                              Object.assign({}, possibles, {
+                                [k]: !v,
+                              })
+                            )
+                          }
+                        />
+                        {k} break
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div>speed: {speed.toFixed(2)}</div>
+                  <div>
                     <button
-                      style={{ padding: "1em", fontSize: "xx-large" }}
-                      onClick={() => handleInput(k)}
+                      disabled={speed <= 0.2}
+                      onClick={() => updateSpeed(speed - 0.05)}
                     >
-                      {k}
+                      ➖
+                    </button>
+                    <button
+                      disabled={speed >= 2}
+                      onClick={() => updateSpeed(speed + 0.05)}
+                    >
+                      ➕
                     </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              </form>
             </div>
-            <div style={{ overflow: "hidden", padding: "2em" }}>
-              <h2
-                onClick={() => {
-                  // @ts-ignore
-                  window.location.reload(true);
+            <div
+              style={{
+                flexGrow: 1,
+              }}
+            >
+              {isLoading ? (
+                <h1 style={{ textAlign: "center" }}>LOADING...</h1>
+              ) : null}
+              <div
+                className={css.dual_center}
+                style={{
+                  opacity: isLoading ? 0 : undefined,
+                  height: "100%",
+                  width: "100%",
+                  display: "flex",
                 }}
               >
-                ThrowBreak420
-              </h2>
-              <ul>
-                <li>
-                  welcome! check out{" "}
-                  <a
-                    style={{ color: "#f3f3f8" }}
-                    href="https://www.youtube.com/watch?v=BDUUbuzuelA"
+                <div
+                  style={{
+                    paddingLeft: "2em",
+                    width: "8em",
+                  }}
+                >
+                  <div>answer: {lastAnswer}</div>
+                  <div>input: {lastInput}</div>
+                  <div>frame: {frame}</div>
+                  <div>streak: {streak}</div>
+                  <div>
+                    <button
+                      style={{ cursor: "pointer" }}
+                      onClick={() => updateUserGuideIsOpen(true)}
+                    >
+                      User Guide
+                    </button>
+                  </div>
+                </div>
+                <div
+                  style={{
+                    flexGrow: 1,
+                    position: "relative",
+                  }}
+                >
+                  {props.children}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-around" }}>
+              {Object.keys(possibles).map((k) => (
+                <div key={k}>
+                  <button
+                    style={{ padding: "1em", fontSize: "xx-large" }}
+                    onClick={() => handleInput(k)}
                   >
-                    this
-                  </a>{" "}
-                  video from PhiDX for pro tips
-                </li>
-                <li>practice throw breaks on any browser, even mobile</li>
-                <li>control speed</li>
-                <li>see which frame you pressed - were you close?</li>
-                <li>record your streak</li>
-                <li>this app is still pre-release</li>
-                <li>
-                  TODO{" "}
-                  <ul>
-                    <li>better user guide</li>
-                    <li>mention random intervals</li>
-                  </ul>
-                </li>
-              </ul>
+                    {k}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
