@@ -92,7 +92,7 @@ export default function Main() {
       fetch(
         `video/${isP1 ? "p1" : "p2"}/${
           isStanding ? "standing" : "grounded"
-        }/${answer}.mkv`
+        }/${answer.replace("+", "")}.mkv`
       )
         .then((response) => response.blob())
         .then((blob) => {
@@ -225,7 +225,7 @@ export default function Main() {
                               )
                             }
                           />
-                          {k.replace("_", "+")} break
+                          {k} break
                         </label>
                       </div>
                     ))}
@@ -259,7 +259,7 @@ export default function Main() {
                 {props.children}
               </div>
               <div style={{ display: "flex", justifyContent: "space-around" }}>
-                {["1", "2", "1+2"].map((k) => (
+                {Object.keys(possibles).map((k) => (
                   <div key={k}>
                     <button
                       style={{ padding: "1em", fontSize: "xx-large" }}
