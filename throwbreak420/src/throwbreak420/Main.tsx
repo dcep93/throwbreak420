@@ -1,7 +1,7 @@
 import { ReactNode, createRef, useEffect, useState } from "react";
 
 const CONFIG = {
-  frameStart: 66,
+  frameStart: 42 + 11,
   breakWindow: 20,
   correctSleepMs: 250,
   incorrectSleepMs: 2000,
@@ -19,6 +19,7 @@ const shortcutToInput: { [k: string]: string } = {
 var initialzed = false;
 var prepVideo = () => {};
 var onEnded = () => {};
+var _speed = 1;
 var nextStreak = 0;
 var answer: string | null = null;
 var timeout: NodeJS.Timeout;
@@ -65,7 +66,7 @@ export default function Main() {
             }
             const video = mainRef.current!;
             video.src = t.src;
-            // video.playbackRate = speed; TODO check
+            video.playbackRate = _speed;
           }}
         ></video>
       </div>
@@ -98,7 +99,7 @@ export default function Main() {
       fetch(
         `video/${isP1 ? "p1" : "p2"}/${
           isStanding ? "standing" : "grounded"
-        }/${answer.replace("+", "")}.mkv`
+        }/${answer.replace("+", "")}.mp4`
       )
         .then((response) => response.blob())
         .then((blob) => {
@@ -112,6 +113,7 @@ export default function Main() {
       if (!video) return;
       newSpeed = parseFloat(newSpeed.toFixed(2));
       video.playbackRate = newSpeed;
+      _speed = newSpeed;
       _updateSpeed(newSpeed);
     };
     const [streak, updateStreak] = useState(0);
