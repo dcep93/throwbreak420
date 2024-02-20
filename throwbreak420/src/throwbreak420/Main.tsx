@@ -286,22 +286,24 @@ export default function Main() {
                   </div>
                 </form>
               </div>
-              <div style={{ flexGrow: 1 }}>
+              <div
+                style={{
+                  flexGrow: 1,
+                }}
+              >
                 {isLoading ? (
                   <h1 style={{ textAlign: "center" }}>LOADING...</h1>
                 ) : null}
                 <div
-                  className={css.x}
+                  className={css.dual_center}
                   style={{
                     opacity: isLoading ? 0 : undefined,
                     height: "100%",
+                    width: "100%",
                     display: "flex",
-                    flexWrap: "wrap",
-                    justifyContent: "center",
                   }}
                 >
                   <div
-                    className={css.y}
                     style={{
                       paddingLeft: "2em",
                       width: "8em",
@@ -313,7 +315,6 @@ export default function Main() {
                     <div>streak: {streak}</div>
                   </div>
                   <div
-                    className={css.z}
                     style={{
                       flexGrow: 1,
                       position: "relative",
