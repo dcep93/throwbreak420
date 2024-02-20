@@ -1,0 +1,16 @@
+.x {
+  align-items: flex-start;
+  background-color: red;
+}
+
+.y {
+  /* height: 1em; */
+  background-color: green;
+}
+
+.z {
+  align-self: stretch;
+  min-width: 99vw;
+  background-color: blue;
+  /* min-height: 100px; */
+}

@@ -1,5 +1,9 @@
 import { ReactNode, createRef, useEffect, useState } from "react";
 
+import css from "./index.module.css";
+
+const VERSION = "1.0.0";
+
 const CONFIG = {
   frameStart: 42 + 11,
   breakWindow: 20,
@@ -32,9 +36,7 @@ export default function Main() {
 
   function Video() {
     return (
-      <div
-        style={{ height: "100%", display: "flex", justifyContent: "center" }}
-      >
+      <div style={{ height: "100%" }}>
         <video
           ref={mainRef}
           style={{
@@ -98,6 +100,9 @@ export default function Main() {
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     const [isLoading, updateIsLoading] = useState(false);
+    const [userGuideIsOpen, updateUserGuideIsOpen] = useState(
+      localStorage.getItem("") || "" >= VERSION
+    );
 
     const getPath = (choice: string) =>
       `video/${isP1 ? "p1" : "p2"}/${
@@ -168,6 +173,10 @@ export default function Main() {
         tabIndex={1}
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
+          if (userGuideIsOpen) {
+            updateUserGuideIsOpen(false);
+            return;
+          }
           if (shortcutToSet !== "") {
             shortcutToInput[e.key] = shortcutToSet;
             updateShortcutToSet(
@@ -277,17 +286,42 @@ export default function Main() {
                   </div>
                 </form>
               </div>
-              <div style={{ paddingLeft: "2em" }}>
-                <div>answer: {lastAnswer}</div>
-                <div>input: {lastInput}</div>
-                <div>frame: {frame}</div>
-                <div>streak: {streak}</div>
-              </div>
-              <div style={{ flexGrow: 1, position: "relative" }}>
+              <div style={{ flexGrow: 1 }}>
                 {isLoading ? (
                   <h1 style={{ textAlign: "center" }}>LOADING...</h1>
                 ) : null}
-                <div hidden={isLoading}>{props.children}</div>
+                <div
+                  className={css.x}
+                  style={{
+                    opacity: isLoading ? 0 : undefined,
+                    height: "100%",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div
+                    className={css.y}
+                    style={{
+                      paddingLeft: "2em",
+                      width: "8em",
+                    }}
+                  >
+                    <div>answer: {lastAnswer}</div>
+                    <div>input: {lastInput}</div>
+                    <div>frame: {frame}</div>
+                    <div>streak: {streak}</div>
+                  </div>
+                  <div
+                    className={css.z}
+                    style={{
+                      flexGrow: 1,
+                      position: "relative",
+                    }}
+                  >
+                    {props.children}
+                  </div>
+                </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-around" }}>
                 {Object.keys(possibles).map((k) => (
@@ -341,6 +375,7 @@ export default function Main() {
       </div>
     );
   }
+
   return (
     <Helper>
       <Video />
