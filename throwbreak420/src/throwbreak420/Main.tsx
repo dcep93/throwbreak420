@@ -257,6 +257,7 @@ export default function Main() {
           <div>set button {shortcutToSet}</div>
         ) : (
           <div
+            className={css.main}
             style={{
               flexGrow: 1,
               display: "flex",

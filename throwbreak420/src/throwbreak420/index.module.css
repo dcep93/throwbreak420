@@ -1,5 +1,9 @@
-@media (max-aspect-ratio: 1067/800) {
+@media (max-aspect-ratio: 1067/1000) {
   .dual_center {
     flex-direction: column;
+  }
+
+  .main {
+    padding-bottom: 10em;
   }
 }
