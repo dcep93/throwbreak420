@@ -1,19 +1,5 @@
 import { ReactNode, createRef, useEffect, useState } from "react";
 
-const ALL_MOVES: {
-  [c: string]: { [k: string]: { name: string; answer: string; path: string } };
-} = {
-  standing: {
-    1: { name: "1 break", answer: "1", path: "standing/1.mp4" },
-    2: { name: "2 break", answer: "2", path: "standing/2.mp4" },
-    12: { name: "1+2 break", answer: "1+2", path: "standing/12.mp4" },
-  },
-  grounded: {
-    1: { name: "1 break", answer: "1", path: "grounded/1.mp4" },
-    2: { name: "2 break", answer: "2", path: "grounded/2.mp4" },
-    12: { name: "1+2 break", answer: "1+2", path: "grounded/12.mp4" },
-  },
-};
 const shortcutToInput: { [k: string]: string } = {
   1: "1",
   2: "2",
@@ -29,7 +15,7 @@ export default function Main() {
   var prepVideo = () => {};
   var onEnded = () => {};
   var speed = 1;
-  var chosenKey: string | null = null;
+  var answer: string | null = null;
   var timeout: NodeJS.Timeout;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
@@ -83,15 +69,12 @@ export default function Main() {
   function Helper(props: { children: ReactNode }) {
     const [shortcutToSet, updateShortcutToSet] = useState("");
     const [isP1, updateIsP1] = useState(true);
-    const [category, _updateCategory] = useState(Object.keys(ALL_MOVES)[0]);
-    const getPossibles = (c: string) =>
-      Object.fromEntries(Object.keys(ALL_MOVES[c]).map((k) => [k, true]));
-    const updateCategory = (c: string) => {
-      streak = 0;
-      _updateCategory(c);
-      updatePossibles(getPossibles(c));
-    };
-    const [possibles, updatePossibles] = useState(getPossibles(category));
+    const [isStanding, updateIsStanding] = useState(true);
+    const [possibles, updatePossibles] = useState({
+      "1": true,
+      "2": true,
+      "1+2": true,
+    });
 
     prepVideo = () => {
       if (!initialzed) return;
@@ -105,8 +88,12 @@ export default function Main() {
         return;
       }
       updateStreak(streak);
-      chosenKey = nextChoice;
-      fetch(`video/${ALL_MOVES[category][chosenKey].path}`)
+      answer = nextChoice;
+      fetch(
+        `video/${isP1 ? "p1" : "p2"}/${
+          isStanding ? "standing" : "grounded"
+        }/${answer}.mkv`
+      )
         .then((response) => response.blob())
         .then((blob) => {
           backupRef.current!.src = window.URL.createObjectURL(blob);
@@ -126,25 +113,25 @@ export default function Main() {
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     useEffect(() => {
+      streak = 0;
       prepVideo();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isP1, category, possibles]);
+    }, [isP1, isStanding, possibles]);
     const handleInput = (button: string) => {
       const video = mainRef.current;
       if (!video) return;
-      if (chosenKey === null) return;
-      const obj = ALL_MOVES[category][chosenKey];
+      if (answer === null) return;
       const rawFrame = Math.ceil(video.currentTime * 60);
       const thisFrame = rawFrame - 66;
       if (thisFrame < 0) return;
       video.pause();
-      const incorrect = thisFrame > 20 || button !== obj.answer;
+      const incorrect = thisFrame > 20 || button !== answer;
       streak = incorrect ? 0 : streak + 1;
       if (!incorrect) updateStreak(streak);
-      updateLastAnswer(obj.answer);
+      updateLastAnswer(answer);
       updateLastInput(button);
       updateFrame(thisFrame);
-      chosenKey = null;
+      answer = null;
       timeout = setTimeout(() => prepVideo(), incorrect ? 2000 : 250);
     };
     onEnded = () => handleInput("-");
@@ -194,41 +181,31 @@ export default function Main() {
                   onSubmit={(e) => e.preventDefault()}
                 >
                   <div>
-                    <div>
-                      <label>
-                        <input
-                          type="radio"
-                          name="p1"
-                          checked={isP1}
-                          onChange={() => updateIsP1(true)}
-                        />
-                        p1
-                      </label>
-                    </div>
-                    <div>
-                      <label onClick={() => alert("not implemented")}>
-                        <input
-                          disabled // TODO
-                          type="radio"
-                          name="p1"
-                          checked={!isP1}
-                          onChange={() => updateIsP1(false)}
-                        />
-                        p2
-                      </label>
-                    </div>
-                  </div>
-                  <div>
-                    {Object.keys(ALL_MOVES).map((c) => (
-                      <div key={c}>
+                    {[true, false].map((t) => (
+                      <div key={t ? "t" : "f"}>
                         <label>
                           <input
                             type="radio"
-                            name="category"
-                            checked={c === category}
-                            onChange={() => updateCategory(c)}
+                            name="isP1"
+                            checked={t === isP1}
+                            onChange={() => updateIsP1(t)}
                           />
-                          {c}
+                          {t ? "p1" : "p2"}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    {[true, false].map((t) => (
+                      <div key={t ? "t" : "f"}>
+                        <label>
+                          <input
+                            type="radio"
+                            name="isStanding"
+                            checked={t === isStanding}
+                            onChange={() => updateIsStanding(t)}
+                          />
+                          {t ? "standing" : "grounded"}
                         </label>
                       </div>
                     ))}
@@ -248,7 +225,7 @@ export default function Main() {
                               )
                             }
                           />
-                          {ALL_MOVES[category][k].name}
+                          {k.replace("_", "+")} break
                         </label>
                       </div>
                     ))}
@@ -322,8 +299,8 @@ export default function Main() {
                 <li>
                   TODO{" "}
                   <ul>
+                    <li>better user guide</li>
                     <li>cache clips before playing</li>
-                    <li>p1/p2</li>
                     <li>random intervals</li>
                   </ul>
                 </li>
