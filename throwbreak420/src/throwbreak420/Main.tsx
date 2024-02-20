@@ -10,16 +10,15 @@ const shortcutToInput: { [k: string]: string } = {
 };
 
 var initialzed = false;
+var prepVideo = () => {};
+var onEnded = () => {};
+var nextStreak = 0;
+var answer: string | null = null;
+var timeout: NodeJS.Timeout;
 
 export default function Main() {
-  var prepVideo = () => {};
-  var onEnded = () => {};
-  var speed = 1;
-  var answer: string | null = null;
-  var timeout: NodeJS.Timeout;
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
-  var streak = 0;
 
   function Video() {
     return (
@@ -59,7 +58,7 @@ export default function Main() {
             }
             const video = mainRef.current!;
             video.src = t.src;
-            video.playbackRate = speed;
+            // video.playbackRate = speed; TODO check
           }}
         ></video>
       </div>
@@ -87,7 +86,7 @@ export default function Main() {
       if (nextChoice === undefined) {
         return;
       }
-      updateStreak(streak);
+      updateStreak(nextStreak);
       answer = nextChoice;
       fetch(
         `video/${isP1 ? "p1" : "p2"}/${
@@ -100,20 +99,20 @@ export default function Main() {
         });
     };
 
-    const [_speed, _updateSpeed] = useState(1);
+    const [speed, _updateSpeed] = useState(1);
     const updateSpeed = (newSpeed: number) => {
       const video = mainRef.current;
       if (!video) return;
-      speed = parseFloat(newSpeed.toFixed(2));
-      video.playbackRate = speed;
-      _updateSpeed(speed);
+      newSpeed = parseFloat(newSpeed.toFixed(2));
+      video.playbackRate = newSpeed;
+      _updateSpeed(newSpeed);
     };
-    const [_streak, updateStreak] = useState(streak);
+    const [streak, updateStreak] = useState(0);
     const [lastAnswer, updateLastAnswer] = useState("");
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     useEffect(() => {
-      streak = 0;
+      nextStreak = 0;
       prepVideo();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isP1, isStanding, possibles]);
@@ -126,8 +125,8 @@ export default function Main() {
       if (thisFrame < 0) return;
       video.pause();
       const incorrect = thisFrame > 20 || button !== answer;
-      streak = incorrect ? 0 : streak + 1;
-      if (!incorrect) updateStreak(streak);
+      nextStreak = incorrect ? 0 : streak + 1;
+      if (!incorrect) updateStreak(nextStreak);
       updateLastAnswer(answer);
       updateLastInput(button);
       updateFrame(thisFrame);
@@ -231,7 +230,7 @@ export default function Main() {
                     ))}
                   </div>
                   <div>
-                    <div>speed: {_speed.toFixed(2)}</div>
+                    <div>speed: {speed.toFixed(2)}</div>
                     <div>
                       <button
                         disabled={speed <= 0.2}
@@ -253,7 +252,7 @@ export default function Main() {
                 <div>answer: {lastAnswer}</div>
                 <div>input: {lastInput}</div>
                 <div>frame: {frame}</div>
-                <div>streak: {_streak}</div>
+                <div>streak: {streak}</div>
               </div>
               <div style={{ flexGrow: 1, position: "relative" }}>
                 {props.children}
