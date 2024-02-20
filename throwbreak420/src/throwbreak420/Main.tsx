@@ -1,5 +1,12 @@
 import { ReactNode, createRef, useEffect, useState } from "react";
 
+const CONFIG = {
+  frameStart: 66,
+  breakWindow: 20,
+  correctSleepMs: 250,
+  incorrectSleepMs: 2000,
+};
+
 const shortcutToInput: { [k: string]: string } = {
   1: "1",
   2: "2",
@@ -121,17 +128,20 @@ export default function Main() {
       if (!video) return;
       if (answer === null) return;
       const rawFrame = Math.ceil(video.currentTime * 60);
-      const thisFrame = rawFrame - 66;
+      const thisFrame = rawFrame - CONFIG.frameStart;
       if (thisFrame < 0) return;
       video.pause();
-      const incorrect = thisFrame > 20 || button !== answer;
+      const incorrect = thisFrame > CONFIG.breakWindow || button !== answer;
       nextStreak = incorrect ? 0 : streak + 1;
       if (!incorrect) updateStreak(nextStreak);
       updateLastAnswer(answer);
       updateLastInput(button);
       updateFrame(thisFrame);
       answer = null;
-      timeout = setTimeout(() => prepVideo(), incorrect ? 2000 : 250);
+      timeout = setTimeout(
+        () => prepVideo(),
+        incorrect ? CONFIG.incorrectSleepMs : CONFIG.correctSleepMs
+      );
     };
     onEnded = () => handleInput("-");
     return (
