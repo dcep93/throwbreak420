@@ -105,7 +105,7 @@ export default function Main() {
     );
     const updateUserGuideIsOpen = (_userGuideIsOpen: boolean) => {
       localStorage.setItem("", _userGuideIsOpen ? "" : VERSION);
-      // _updateUserGuideIsOpen(_userGuideIsOpen);
+      _updateUserGuideIsOpen(_userGuideIsOpen);
       if (initialzed) {
         // @ts-ignore
         window.location.reload(true);
@@ -224,7 +224,10 @@ export default function Main() {
                 }}
               >
                 <h1>ThrowBreak420 v{VERSION}</h1>
-                <h3 onClick={() => updateUserGuideIsOpen(false)}>
+                <h3
+                  onClick={() => updateUserGuideIsOpen(false)}
+                  style={{ cursor: "pointer" }}
+                >
                   click here to continue
                 </h3>
                 <p>
