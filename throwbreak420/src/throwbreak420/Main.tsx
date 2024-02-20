@@ -105,7 +105,7 @@ export default function Main() {
     );
     const updateUserGuideIsOpen = (_userGuideIsOpen: boolean) => {
       localStorage.setItem("", _userGuideIsOpen ? "" : VERSION);
-      _updateUserGuideIsOpen(_userGuideIsOpen);
+      // _updateUserGuideIsOpen(_userGuideIsOpen);
       if (initialzed) {
         // @ts-ignore
         window.location.reload(true);
@@ -182,7 +182,6 @@ export default function Main() {
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
           if (userGuideIsOpen) {
-            updateUserGuideIsOpen(false);
             return;
           }
           if (shortcutToSet !== "") {
@@ -212,7 +211,6 @@ export default function Main() {
       >
         {userGuideIsOpen ? (
           <div
-            onClick={() => updateUserGuideIsOpen(false)}
             style={{
               width: "100%",
               display: "flex",
@@ -226,7 +224,9 @@ export default function Main() {
                 }}
               >
                 <h1>ThrowBreak420 v{VERSION}</h1>
-                <h3>click anywhere to continue</h3>
+                <h3 onClick={() => updateUserGuideIsOpen(false)}>
+                  click here to continue
+                </h3>
                 <p>
                   if you're like me, breaking a throw in a match is impossible,
                   and even in practice mode, it's too fast and subtle to
