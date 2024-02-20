@@ -260,6 +260,10 @@ export default function Main() {
                     ideally, there would be a random delay before the throw is
                     done, but it hasn't been implemented yet
                   </li>
+                  <li>
+                    short delay if you got the break correct, long delay if you
+                    missed the break
+                  </li>
                 </ul>
               </div>
             </div>
