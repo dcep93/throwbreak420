@@ -2,7 +2,7 @@ import { ReactNode, createRef, useEffect, useState } from "react";
 
 import css from "./index.module.css";
 
-const VERSION = "1.0.1";
+const VERSION = "1.1.0";
 
 const CONFIG = {
   frameStart: 42 + 11,
