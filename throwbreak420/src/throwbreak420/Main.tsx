@@ -137,7 +137,7 @@ export default function Main() {
         updateIsLoading(true);
         Promise.all(
           missing.map((p) =>
-            fetch(p)
+            fetch(p, { cache: "force-cache" })
               .then((r) => r.blob())
               .then((blob) => window.URL.createObjectURL(blob))
               .then((src) => (videoCache[p] = src))
@@ -233,9 +233,12 @@ export default function Main() {
             style={{
               width: "100%",
               display: "flex",
+              overflow: "scroll",
             }}
           >
-            <div style={{ alignSelf: "center", flexGrow: 1 }}>
+            <div
+              style={{ alignSelf: "center", flexGrow: 1, maxHeight: "100%" }}
+            >
               <div
                 style={{
                   maxWidth: "40em",
@@ -287,6 +290,7 @@ export default function Main() {
                 <div>
                   <div>UPDATE LOG:</div>
                   <ul>
+                    <li>hopefully better video caching</li>
                     <li>displays correctness background color</li>
                     <li>records highest streak</li>
                   </ul>
