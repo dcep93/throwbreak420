@@ -2,7 +2,7 @@ import { ReactNode, createRef, useEffect, useState } from "react";
 
 import css from "./index.module.css";
 
-const VERSION = "1.0.0";
+const VERSION = "1.0.1";
 
 const CONFIG = {
   frameStart: 42 + 11,
@@ -96,15 +96,18 @@ export default function Main() {
       _updateSpeed(newSpeed);
     };
     const [streak, updateStreak] = useState(0);
+    const [highestStreak, updateHighestStreak] = useState(
+      parseInt(localStorage.getItem("streak") || "0")
+    );
     const [lastAnswer, updateLastAnswer] = useState("");
     const [lastInput, updateLastInput] = useState("");
     const [frame, updateFrame] = useState(0);
     const [isLoading, updateIsLoading] = useState(false);
     const [userGuideIsOpen, _updateUserGuideIsOpen] = useState(
-      VERSION > (localStorage.getItem("") || "")
+      VERSION > (localStorage.getItem("VERSION") || "")
     );
     const updateUserGuideIsOpen = (_userGuideIsOpen: boolean) => {
-      localStorage.setItem("", _userGuideIsOpen ? "" : VERSION);
+      localStorage.setItem("VERSION", _userGuideIsOpen ? "" : VERSION);
       _updateUserGuideIsOpen(_userGuideIsOpen);
       if (initialzed) {
         // @ts-ignore
@@ -165,7 +168,13 @@ export default function Main() {
       video.pause();
       const incorrect = thisFrame > CONFIG.breakWindow || button !== answer;
       nextStreak = incorrect ? 0 : streak + 1;
-      if (!incorrect) updateStreak(nextStreak);
+      if (!incorrect) {
+        updateStreak(nextStreak);
+        if (nextStreak > highestStreak) {
+          updateHighestStreak(nextStreak);
+          localStorage.setItem("streak", nextStreak.toString());
+        }
+      }
       updateLastAnswer(answer);
       updateLastInput(button);
       updateFrame(thisFrame);
@@ -265,6 +274,12 @@ export default function Main() {
                     missed the break
                   </li>
                 </ul>
+                <div>
+                  <div>UPDATE LOG:</div>
+                  <ul>
+                    <li>records highest streak</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -380,6 +395,9 @@ export default function Main() {
                   <div>input: {lastInput}</div>
                   <div>frame: {frame}</div>
                   <div>streak: {streak}</div>
+                  <div style={{ paddingTop: "1em" }}>
+                    highest streak: {highestStreak}
+                  </div>
                   <div>
                     <button
                       style={{ cursor: "pointer" }}
