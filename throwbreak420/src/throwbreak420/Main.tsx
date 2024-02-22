@@ -114,6 +114,9 @@ export default function Main() {
         window.location.reload(true);
       }
     };
+    const [backgroundColor, updateBackgroundColor] = useState<
+      string | undefined
+    >(undefined);
 
     const getPath = (choice: string) =>
       `video/${isP1 ? "p1" : "p2"}/${
@@ -167,6 +170,13 @@ export default function Main() {
       if (thisFrame < 0) return;
       video.pause();
       const incorrect = thisFrame > CONFIG.breakWindow || button !== answer;
+      updateBackgroundColor(
+        !incorrect
+          ? "rgba(0,0,30)" // right
+          : button === answer
+          ? "rgba(100,80,0)" // slow
+          : "rgba(60,0,0)" // wrong
+      );
       nextStreak = incorrect ? 0 : streak + 1;
       if (!incorrect) {
         updateStreak(nextStreak);
@@ -277,6 +287,7 @@ export default function Main() {
                 <div>
                   <div>UPDATE LOG:</div>
                   <ul>
+                    <li>displays correctness background color</li>
                     <li>records highest streak</li>
                   </ul>
                 </div>
@@ -292,6 +303,7 @@ export default function Main() {
               flexGrow: 1,
               display: "flex",
               flexDirection: "column",
+              backgroundColor,
             }}
           >
             <div>
