@@ -30,6 +30,8 @@ var nextStreak = 0;
 var answer: string | null = null;
 var timeout: NodeJS.Timeout;
 
+const historyLog: { answer: string; button: string; thisFrame: number }[] = [];
+
 export default function Main() {
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
@@ -120,10 +122,6 @@ export default function Main() {
       string | undefined
     >(undefined);
 
-    const [historyLog, updateHistoryLog] = useState<
-      { answer: string; button: string; thisFrame: number }[]
-    >([]);
-
     const getPath = (choice: string) =>
       `video/${isP1 ? "p1" : "p2"}/${
         isStanding ? "standing" : "grounded"
@@ -191,7 +189,7 @@ export default function Main() {
           localStorage.setItem("streak", nextStreak.toString());
         }
       }
-      updateHistoryLog(historyLog.concat({ answer, button, thisFrame }));
+      historyLog.push({ answer, button, thisFrame });
       updateLastAnswer(answer);
       updateLastInput(button);
       updateFrame(thisFrame);
