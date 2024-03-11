@@ -1,9 +1,19 @@
 @media (max-aspect-ratio: 1067/1000) {
+  /* tall screen */
   .dual_center {
     flex-direction: column;
   }
 
   .main {
     padding-bottom: 10em;
+  }
+
+  .video {
+    width: 100%;
+    height: initial !important;
+  }
+
+  .hidden_on_tall {
+    display: none;
   }
 }

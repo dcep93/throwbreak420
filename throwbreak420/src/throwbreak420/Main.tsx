@@ -38,6 +38,7 @@ export default function Main() {
     return (
       <div style={{ height: "100%" }}>
         <video
+          className={css.video}
           ref={mainRef}
           style={{
             position: "absolute",
@@ -51,6 +52,7 @@ export default function Main() {
           onEnded={onEnded}
         ></video>
         <video
+          className={css.video}
           src={`video/blank.mp4`}
           ref={backupRef}
           style={{
@@ -117,6 +119,10 @@ export default function Main() {
     const [backgroundColor, updateBackgroundColor] = useState<
       string | undefined
     >(undefined);
+
+    const [historyLog, updateHistoryLog] = useState<
+      { answer: string; button: string; thisFrame: number }[]
+    >([]);
 
     const getPath = (choice: string) =>
       `video/${isP1 ? "p1" : "p2"}/${
@@ -185,6 +191,7 @@ export default function Main() {
           localStorage.setItem("streak", nextStreak.toString());
         }
       }
+      updateHistoryLog(historyLog.concat({ answer, button, thisFrame }));
       updateLastAnswer(answer);
       updateLastInput(button);
       updateFrame(thisFrame);
@@ -290,7 +297,8 @@ export default function Main() {
                 <div>
                   <div>UPDATE LOG:</div>
                   <ul>
-                    <li>hopefully better video caching</li>
+                    <li>shows history</li>
+                    <li>better video caching</li>
                     <li>displays correctness background color</li>
                     <li>records highest streak</li>
                   </ul>
@@ -404,23 +412,64 @@ export default function Main() {
                 <div
                   style={{
                     paddingLeft: "2em",
-                    width: "8em",
+                    width: "12em",
+                    display: "flex",
+                    flexDirection: "column",
                   }}
                 >
-                  <div>answer: {lastAnswer}</div>
-                  <div>input: {lastInput}</div>
-                  <div>frame: {frame}</div>
-                  <div>streak: {streak}</div>
-                  <div style={{ paddingTop: "1em" }}>
-                    highest streak: {highestStreak}
-                  </div>
                   <div>
-                    <button
-                      style={{ cursor: "pointer" }}
-                      onClick={() => updateUserGuideIsOpen(true)}
+                    <div>answer: {lastAnswer}</div>
+                    <div>input: {lastInput}</div>
+                    <div>frame: {frame}</div>
+                    <div>streak: {streak}</div>
+                    <div style={{ paddingTop: "1em" }}>
+                      highest streak: {highestStreak}
+                    </div>
+                    <div>
+                      <button
+                        style={{ cursor: "pointer" }}
+                        onClick={() => updateUserGuideIsOpen(true)}
+                      >
+                        User Guide
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    className={css.hidden_on_tall}
+                    style={{
+                      flexGrow: 1,
+                      position: "relative",
+                      overflow: "scroll",
+                      paddingTop: "5em",
+                    }}
+                  >
+                    <div>HISTORY</div>
+                    <table
+                      style={{
+                        fontSize: "small",
+                        position: "absolute",
+                      }}
                     >
-                      User Guide
-                    </button>
+                      <thead>
+                        <tr>
+                          <td>answer</td>
+                          <td>input</td>
+                          <td>frame</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {historyLog
+                          .slice()
+                          .reverse()
+                          .map((o, i) => (
+                            <tr key={i}>
+                              <td>{o.answer}</td>
+                              <td>{o.button}</td>
+                              <td>{o.thisFrame}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
                 <div
