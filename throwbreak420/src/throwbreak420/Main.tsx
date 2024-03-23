@@ -12,6 +12,8 @@ const CONFIG = {
   framesPerSecond: 60,
 };
 
+const params = new URLSearchParams(window.location.search);
+
 const shortcutToInput: { [k: string]: string } = {
   1: "1",
   2: "2",
@@ -224,7 +226,9 @@ export default function Main() {
           const button = shortcutToInput[e.key];
           if (button === undefined) {
             if (e.metaKey || !e.code.startsWith("Key")) {
-              alert(JSON.stringify({ meta: e.metaKey, code: e.code }));
+              if (params.has("debug")) {
+                alert(JSON.stringify({ meta: e.metaKey, code: e.code }));
+              }
               return;
             }
             initialzed = false;
