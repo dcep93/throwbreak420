@@ -35,7 +35,12 @@ var videoTimeout: NodeJS.Timeout;
 var inputTimeout: NodeJS.Timeout;
 var keysPressed: { [k: string]: boolean } = {};
 
-const historyLog: { answer: string; button: string; thisFrame: number }[] = [];
+const historyLog: {
+  answer: string;
+  button: string;
+  thisFrame: number;
+  streak: number;
+}[] = [];
 
 export default function Main() {
   const mainRef = createRef<HTMLVideoElement>();
@@ -196,7 +201,7 @@ export default function Main() {
           localStorage.setItem("streak", nextStreak.toString());
         }
       }
-      historyLog.push({ answer, button, thisFrame });
+      historyLog.push({ answer, button, thisFrame, streak: nextStreak });
       updateLastAnswer(answer);
       updateLastInput(button);
       updateFrame(thisFrame);
@@ -435,7 +440,7 @@ export default function Main() {
                 <div
                   style={{
                     paddingLeft: "2em",
-                    width: "12em",
+                    width: "13em",
                     display: "flex",
                     flexDirection: "column",
                   }}
@@ -478,6 +483,7 @@ export default function Main() {
                           <td>answer</td>
                           <td>input</td>
                           <td>frame</td>
+                          <td>streak</td>
                         </tr>
                       </thead>
                       <tbody>
@@ -489,6 +495,7 @@ export default function Main() {
                               <td>{o.answer}</td>
                               <td>{o.button}</td>
                               <td>{o.thisFrame}</td>
+                              <td>{o.streak}</td>
                             </tr>
                           ))}
                       </tbody>
