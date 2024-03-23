@@ -36,6 +36,8 @@ export default function Main() {
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
 
+  // return <SlicePreview />;
+
   function Video() {
     return (
       <div style={{ height: "100%" }}>
