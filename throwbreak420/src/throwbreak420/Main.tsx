@@ -5,7 +5,7 @@ import css from "./index.module.css";
 const VERSION = "1.1.0";
 
 const CONFIG = {
-  frameStart: 42 + 11,
+  frameStart: 42,
   breakWindow: 20,
   correctSleepMs: 250,
   incorrectSleepMs: 2000,
@@ -297,6 +297,7 @@ export default function Main() {
                 <div>
                   <div>UPDATE LOG:</div>
                   <ul>
+                    <li>KING</li>
                     <li>shows history</li>
                     <li>better video caching</li>
                     <li>displays correctness background color</li>
