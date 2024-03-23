@@ -9,6 +9,7 @@ const CONFIG = {
   breakWindow: 20,
   correctSleepMs: 250,
   incorrectSleepMs: 2000,
+  framesPerSecond: 60,
 };
 
 const shortcutToInput: { [k: string]: string } = {
@@ -28,7 +29,9 @@ var onEnded = () => {};
 var _speed = 1;
 var nextStreak = 0;
 var answer: string | null = null;
-var timeout: NodeJS.Timeout;
+var videoTimeout: NodeJS.Timeout;
+var inputTimeout: NodeJS.Timeout;
+var keysPressed: { [k: string]: boolean } = {};
 
 const historyLog: { answer: string; button: string; thisFrame: number }[] = [];
 
@@ -131,7 +134,7 @@ export default function Main() {
 
     prepVideo = () => {
       if (!initialzed) return;
-      clearTimeout(timeout);
+      clearTimeout(videoTimeout);
       const choices = Object.entries(possibles)
         .map(([k, v]) => ({ k, v }))
         .filter(({ v }) => v)
@@ -171,7 +174,7 @@ export default function Main() {
       const video = mainRef.current;
       if (!video) return;
       if (answer === null) return;
-      const rawFrame = Math.ceil(video.currentTime * 60);
+      const rawFrame = Math.ceil(video.currentTime * CONFIG.framesPerSecond);
       const thisFrame = rawFrame - CONFIG.frameStart;
       if (thisFrame < 0) return;
       video.pause();
@@ -196,7 +199,7 @@ export default function Main() {
       updateLastInput(button);
       updateFrame(thisFrame);
       answer = null;
-      timeout = setTimeout(
+      videoTimeout = setTimeout(
         () => prepVideo(),
         incorrect ? CONFIG.incorrectSleepMs : CONFIG.correctSleepMs
       );
@@ -207,6 +210,7 @@ export default function Main() {
         tabIndex={1}
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
+          clearTimeout(inputTimeout);
           if (userGuideIsOpen) {
             return;
           }
@@ -219,12 +223,24 @@ export default function Main() {
           }
           const button = shortcutToInput[e.key];
           if (button === undefined) {
-            if (e.metaKey || !e.code.startsWith("Key")) return;
+            if (e.metaKey || !e.code.startsWith("Key")) {
+              alert(JSON.stringify({ meta: e.metaKey, code: e.code }));
+              return;
+            }
             initialzed = false;
             updateShortcutToSet("1");
             return;
           }
-          handleInput(button);
+          keysPressed[button] = true;
+          inputTimeout = setTimeout(() => {
+            const allButtons =
+              Object.keys(keysPressed).length === 1
+                ? button
+                : shortcutToInput[3];
+            keysPressed = {};
+            handleInput(allButtons);
+            // wait for half a frame - idk
+          }, 1000 / CONFIG.framesPerSecond / 2);
         }}
         style={{
           fontFamily: "Courier New",
@@ -297,6 +313,8 @@ export default function Main() {
                 <div>
                   <div>UPDATE LOG:</div>
                   <ul>
+                    <li>press 1 and 2 at the same time to trigger 1+2</li>
+                    <li>remote debug capabilities</li>
                     <li>KING</li>
                     <li>shows history</li>
                     <li>better video caching</li>
