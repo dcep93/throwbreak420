@@ -1,5 +1,6 @@
 import { ReactNode, createRef, useEffect, useState } from "react";
 
+import ControllerListener from "./ControllerListener";
 import css from "./index.module.css";
 
 const VERSION = "1.1.0";
@@ -26,7 +27,7 @@ const shortcutToInput: { [k: string]: string } = {
 const videoCache: { [p: string]: string } = {};
 
 var initialzed = false;
-var prepVideo = () => {};
+var initialze = () => {};
 var onEnded = () => {};
 var _speed = 1;
 var nextStreak = 0;
@@ -81,7 +82,7 @@ export default function Main() {
             t.pause();
             if (!initialzed) {
               initialzed = true;
-              prepVideo();
+              initialze();
               return;
             }
             const video = mainRef.current!;
@@ -139,7 +140,7 @@ export default function Main() {
         isStanding ? "standing" : "grounded"
       }/${choice.replace("+", "")}.mp4`;
 
-    prepVideo = () => {
+    const prepVideo = () => {
       if (!initialzed) return;
       clearTimeout(videoTimeout);
       const choices = Object.entries(possibles)
@@ -170,6 +171,11 @@ export default function Main() {
       updateStreak(nextStreak);
       answer = nextChoice;
       backupRef.current!.src = videoCache[getPath(nextChoice)];
+    };
+
+    initialze = () => {
+      prepVideo();
+      ControllerListener(onKeyDownHelper);
     };
 
     useEffect(() => {
@@ -212,44 +218,45 @@ export default function Main() {
       );
     };
     onEnded = () => handleInput("-");
+    const onKeyDownHelper = (key: string) => {
+      clearTimeout(inputTimeout);
+      if (userGuideIsOpen) {
+        return;
+      }
+      if (shortcutToSet !== "") {
+        shortcutToInput[key] = shortcutToSet;
+        updateShortcutToSet(
+          { "1": "2", "2": "1+2", "1+2": "" }[shortcutToSet]!
+        );
+        return;
+      }
+      const button = shortcutToInput[key];
+      if (button === undefined) {
+        initialzed = false;
+        updateShortcutToSet("1");
+        return;
+      }
+      keysPressed[button] = true;
+      inputTimeout = setTimeout(() => {
+        const allButtons =
+          Object.keys(keysPressed).length === 1 ? button : shortcutToInput[3];
+        keysPressed = {};
+        handleInput(allButtons);
+        // wait for half a frame - idk
+      }, 1000 / CONFIG.framesPerSecond / 2);
+    };
     return (
       <div
         tabIndex={1}
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
-          clearTimeout(inputTimeout);
-          if (userGuideIsOpen) {
-            return;
-          }
-          if (shortcutToSet !== "") {
-            shortcutToInput[e.key] = shortcutToSet;
-            updateShortcutToSet(
-              { "1": "2", "2": "1+2", "1+2": "" }[shortcutToSet]!
-            );
-            return;
-          }
-          const button = shortcutToInput[e.key];
-          if (button === undefined) {
-            if (e.metaKey || !e.code.startsWith("Key")) {
-              if (params.has("debug")) {
-                alert(JSON.stringify({ meta: e.metaKey, code: e.code }));
-              }
-              return;
+          if (e.metaKey || !e.code.startsWith("Key")) {
+            if (params.has("debug")) {
+              alert(JSON.stringify({ meta: e.metaKey, code: e.code }));
             }
-            initialzed = false;
-            updateShortcutToSet("1");
             return;
           }
-          keysPressed[button] = true;
-          inputTimeout = setTimeout(() => {
-            const allButtons =
-              Object.keys(keysPressed).length === 1
-                ? button
-                : shortcutToInput[3];
-            keysPressed = {};
-            handleInput(allButtons);
-            // wait for half a frame - idk
-          }, 1000 / CONFIG.framesPerSecond / 2);
+          onKeyDownHelper(e.key);
         }}
         style={{
           fontFamily: "Courier New",
