@@ -250,7 +250,7 @@ export default function Main() {
         tabIndex={1}
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
-          if (e.metaKey || !e.code.startsWith("Key")) {
+          if (e.metaKey) {
             if (params.has("debug")) {
               alert(JSON.stringify({ meta: e.metaKey, code: e.code }));
             }
