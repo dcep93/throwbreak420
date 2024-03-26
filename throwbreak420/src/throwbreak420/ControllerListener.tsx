@@ -10,7 +10,13 @@ export default function ControllerListener(
           typeof button === "object" ? button.pressed : button === 1.0;
         if (pressed && !allPressed[key]) {
           alert(JSON.stringify({ key, pressed, button, allPressed }));
-          onKeyDownHelper(key);
+          try {
+            onKeyDownHelper(key);
+            alert("success");
+          } catch (e) {
+            alert("fail");
+            alert(e);
+          }
         }
         allPressed[key] = pressed;
       });
