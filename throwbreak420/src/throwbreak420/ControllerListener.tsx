@@ -5,13 +5,14 @@ export default function ControllerListener(
     const allPressed: { [key: string]: boolean } = {};
     setInterval(() => {
       Array.from(e.gamepad.buttons).forEach((button, i) => {
-        const index = i.toString();
+        const key = `controller_${i}`;
         const pressed =
           typeof button === "object" ? button.pressed : button === 1.0;
-        if (pressed && !allPressed[index]) {
-          onKeyDownHelper(index);
+        if (pressed && !allPressed[key]) {
+          alert(JSON.stringify({ key, pressed, button }));
+          onKeyDownHelper(key);
         }
-        allPressed[index] = pressed;
+        allPressed[key] = pressed;
       });
     });
   });
