@@ -136,7 +136,7 @@ export default function Main() {
     >(undefined);
 
     const getPath = (choice: string) =>
-      `video/${isP1 ? "p1" : "p2"}/${
+      `video/4_2_2024/${isP1 ? "p1" : "p2"}/${
         isStanding ? "standing" : "grounded"
       }/${choice.replace("+", "")}.mp4`;
 
