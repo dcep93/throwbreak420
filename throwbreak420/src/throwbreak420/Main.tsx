@@ -23,6 +23,7 @@ const shortcutToInput: { [k: string]: string } = {
   i: "2",
   o: "1+2",
 };
+var shortcutToSet = "";
 
 const videoCache: { [p: string]: string } = {};
 
@@ -95,7 +96,11 @@ export default function Main() {
   }
 
   function Helper(props: { children: ReactNode }) {
-    const [shortcutToSet, updateShortcutToSet] = useState("");
+    const [_shortcutToSet, _updateShortcutToSet] = useState("");
+    const updateShortcutToSet = (v: string) => {
+      shortcutToSet = v;
+      _updateShortcutToSet(v);
+    };
     const [isP1, updateIsP1] = useState(true);
     const [isStanding, updateIsStanding] = useState(true);
     const [possibles, updatePossibles] = useState({
@@ -351,8 +356,8 @@ export default function Main() {
               </div>
             </div>
           </div>
-        ) : shortcutToSet !== "" ? (
-          <div>set button {shortcutToSet}</div>
+        ) : _shortcutToSet !== "" ? (
+          <div>set button {_shortcutToSet}</div>
         ) : (
           <div
             className={css.main}
