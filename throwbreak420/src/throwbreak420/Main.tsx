@@ -255,7 +255,8 @@ export default function Main() {
         tabIndex={1}
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
-          if (e.metaKey || e.key === "Alt") {
+          console.log(e);
+          if (["Alt", "Control", "Meta"].includes(e.key)) {
             if (params.has("debug")) {
               alert(
                 JSON.stringify({ key: e.key, meta: e.metaKey, code: e.code })
