@@ -255,9 +255,11 @@ export default function Main() {
         tabIndex={1}
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
-          if (e.metaKey) {
+          if (e.metaKey || e.key === "Alt") {
             if (params.has("debug")) {
-              alert(JSON.stringify({ meta: e.metaKey, code: e.code }));
+              alert(
+                JSON.stringify({ key: e.key, meta: e.metaKey, code: e.code })
+              );
             }
             return;
           }
