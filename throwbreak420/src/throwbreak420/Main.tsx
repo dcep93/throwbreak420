@@ -15,6 +15,8 @@ const CONFIG = {
 
 const params = new URLSearchParams(window.location.search);
 
+const debug = Math.floor(Math.random() * 1000);
+
 const shortcutToInput: { [k: string]: string } = {
   1: "1",
   2: "2",
@@ -405,6 +407,7 @@ export default function Main() {
                       </label>
                     </div>
                   ))}
+                  <div>magic debug: {debug}</div>
                 </div>
                 <div>
                   {Object.entries(possibles).map(([k, v]) => (
