@@ -65,7 +65,7 @@ export default function Main() {
           playsInline
           autoPlay
           muted
-          onEnded={onEnded}
+          onEnded={() => onEnded()}
         ></video>
         <video
           className={css.video}
@@ -256,7 +256,7 @@ export default function Main() {
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
           console.log(e);
-          if (["Alt", "Control", "Meta"].includes(e.key)) {
+          if (["Alt", "Control", "Meta", "Shift"].includes(e.key)) {
             if (params.has("debug")) {
               alert(
                 JSON.stringify({ key: e.key, meta: e.metaKey, code: e.code })
