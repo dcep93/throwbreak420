@@ -1,9 +1,11 @@
 import { ReactNode, createRef, useEffect, useState } from "react";
 
 import ControllerListener from "./ControllerListener";
+import UserGuide from "./UserGuide";
+import Video from "./Video";
 import css from "./index.module.css";
 
-const VERSION = "1.1.0";
+export const VERSION = "1.1.0";
 
 const CONFIG = {
   frameStart: 42,
@@ -27,10 +29,10 @@ var shortcutToSet = "";
 
 const videoCache: { [p: string]: string } = {};
 
-var initialzed = false;
-var initialze = () => {};
+var initialized = false;
+var initialize = () => {};
 var onEnded = () => {};
-var _speed = 1;
+var speed = 1;
 var nextStreak = 0;
 var answer: string | null = null;
 var videoTimeout: NodeJS.Timeout;
@@ -50,51 +52,6 @@ export default function Main() {
 
   // return <SlicePreview />;
 
-  function Video() {
-    return (
-      <div style={{ height: "100%" }}>
-        <video
-          className={css.video}
-          ref={mainRef}
-          style={{
-            position: "absolute",
-            height: "100%",
-            maxWidth: "100%",
-            zIndex: 1,
-          }}
-          playsInline
-          autoPlay
-          muted
-          onEnded={() => onEnded()}
-        ></video>
-        <video
-          className={css.video}
-          src={`video/blank.mp4`}
-          ref={backupRef}
-          style={{
-            position: "absolute",
-            height: "100%",
-            maxWidth: "100%",
-          }}
-          autoPlay
-          playsInline
-          onCanPlay={() => {
-            const t = backupRef.current!;
-            t.pause();
-            if (!initialzed) {
-              initialzed = true;
-              initialze();
-              return;
-            }
-            const video = mainRef.current!;
-            video.src = t.src;
-            video.playbackRate = _speed;
-          }}
-        ></video>
-      </div>
-    );
-  }
-
   function Helper(props: { children: ReactNode }) {
     const [_shortcutToSet, _updateShortcutToSet] = useState("");
     const updateShortcutToSet = (v: string) => {
@@ -108,13 +65,13 @@ export default function Main() {
       "2": true,
       "1+2": true,
     });
-    const [speed, _updateSpeed] = useState(1);
+    const [_speed, _updateSpeed] = useState(1);
     const updateSpeed = (newSpeed: number) => {
       const video = mainRef.current;
       if (!video) return;
       newSpeed = parseFloat(newSpeed.toFixed(2));
       video.playbackRate = newSpeed;
-      _speed = newSpeed;
+      speed = newSpeed;
       _updateSpeed(newSpeed);
     };
     const [streak, updateStreak] = useState(0);
@@ -131,7 +88,7 @@ export default function Main() {
     const updateUserGuideIsOpen = (_userGuideIsOpen: boolean) => {
       localStorage.setItem("VERSION", _userGuideIsOpen ? "" : VERSION);
       _updateUserGuideIsOpen(_userGuideIsOpen);
-      if (initialzed) {
+      if (initialized) {
         // @ts-ignore
         window.location.reload(true);
       }
@@ -146,7 +103,7 @@ export default function Main() {
       }/${choice.replace("+", "")}.mp4`;
 
     const prepVideo = () => {
-      if (!initialzed) return;
+      if (!initialized) return;
       clearTimeout(videoTimeout);
       const choices = Object.entries(possibles)
         .map(([k, v]) => ({ k, v }))
@@ -178,7 +135,8 @@ export default function Main() {
       backupRef.current!.src = videoCache[getPath(nextChoice)];
     };
 
-    initialze = () => {
+    initialize = () => {
+      initialized = true;
       prepVideo();
       ControllerListener(onKeyDownHelper);
     };
@@ -237,7 +195,7 @@ export default function Main() {
       }
       const button = shortcutToInput[key];
       if (button === undefined) {
-        initialzed = false;
+        initialized = false;
         updateShortcutToSet("1");
         return;
       }
@@ -276,89 +234,7 @@ export default function Main() {
         }}
       >
         {userGuideIsOpen ? (
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              overflow: "scroll",
-            }}
-          >
-            <div
-              style={{ alignSelf: "center", flexGrow: 1, maxHeight: "100%" }}
-            >
-              <div
-                style={{
-                  maxWidth: "40em",
-                  margin: "auto",
-                }}
-              >
-                <h1>ThrowBreak420 v{VERSION}</h1>
-                <h3
-                  onClick={() => updateUserGuideIsOpen(false)}
-                  style={{ cursor: "pointer" }}
-                >
-                  click here to continue
-                </h3>
-                <div>
-                  <a
-                    style={{ color: "white" }}
-                    href={
-                      "https://www.reddit.com/r/Tekken/comments/1avreg9/announcing_throwbreak420_an_online_tool/?"
-                    }
-                  >
-                    reddit post
-                  </a>
-                </div>
-                <div>
-                  <a
-                    style={{ color: "white" }}
-                    href={"https://github.com/dcep93/throwbreak420/"}
-                  >
-                    source code
-                  </a>
-                </div>
-                <p>
-                  if you're like me, breaking a throw in a match is impossible,
-                  and even in practice mode, it's too fast and subtle to
-                  distinguish which arm it was!
-                </p>
-                <p>
-                  this tool has several features to train us stoners on how to
-                  recognize throws, and maybe someday, we will be able to
-                  consitently break them in a match
-                </p>
-                <ul>
-                  <li>control speed</li>
-                  <li>
-                    see which frame you pressed - were you close? throws have a
-                    20 frame break window
-                  </li>
-                  <li>practice on any browser, even mobile</li>
-                  <li>record your streak, brag to your wife's boyfriend</li>
-                  <li>
-                    ideally, there would be a random delay before the throw is
-                    done, but it hasn't been implemented yet
-                  </li>
-                  <li>
-                    short delay if you got the break correct, long delay if you
-                    missed the break
-                  </li>
-                </ul>
-                <div>
-                  <div>UPDATE LOG:</div>
-                  <ul>
-                    <li>press 1 and 2 at the same time to trigger 1+2</li>
-                    <li>remote debug capabilities</li>
-                    <li>KING</li>
-                    <li>shows history</li>
-                    <li>better video caching</li>
-                    <li>displays correctness background color</li>
-                    <li>records highest streak</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
+          <UserGuide updateUserGuideIsOpen={updateUserGuideIsOpen} />
         ) : _shortcutToSet !== "" ? (
           <div>set button {_shortcutToSet}</div>
         ) : (
@@ -427,17 +303,17 @@ export default function Main() {
                   ))}
                 </div>
                 <div>
-                  <div>speed: {speed.toFixed(2)}</div>
+                  <div>speed: {_speed.toFixed(2)}</div>
                   <div>
                     <button
-                      disabled={speed <= 0.2}
-                      onClick={() => updateSpeed(speed - 0.05)}
+                      disabled={_speed <= 0.2}
+                      onClick={() => updateSpeed(_speed - 0.05)}
                     >
                       ➖
                     </button>
                     <button
-                      disabled={speed >= 2}
-                      onClick={() => updateSpeed(speed + 0.05)}
+                      disabled={_speed >= 2}
+                      onClick={() => updateSpeed(_speed + 0.05)}
                     >
                       ➕
                     </button>
@@ -557,7 +433,16 @@ export default function Main() {
 
   return (
     <Helper>
-      <Video />
+      <Video
+        get={() => ({
+          mainRef,
+          backupRef,
+          onEnded,
+          initialized,
+          initialize,
+          speed,
+        })}
+      />
     </Helper>
   );
 }
