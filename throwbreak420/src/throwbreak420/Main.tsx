@@ -18,7 +18,7 @@ const CONFIG = {
   framesPerSecond: 60,
 };
 
-const params = new URLSearchParams(window.location.search);
+export const params = new URLSearchParams(window.location.search);
 
 const shortcutToInput: { [k: string]: string } = {
   1: "1",
@@ -187,6 +187,14 @@ export default function Main() {
     onEnded = () => handleInput("-");
     const onKeyDownHelper = (key: string) => {
       clearTimeout(inputTimeout);
+      if (params.has("debug")) {
+        alert(
+          JSON.stringify({
+            debug: 193,
+            key,
+          })
+        );
+      }
       if (userGuideIsOpen) {
         return;
       }
@@ -218,12 +226,17 @@ export default function Main() {
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
           console.log(e);
+          if (params.has("debug")) {
+            alert(
+              JSON.stringify({
+                debug: 224,
+                key: e.key,
+                meta: e.metaKey,
+                code: e.code,
+              })
+            );
+          }
           if (["Alt", "Control", "Meta", "Shift"].includes(e.key)) {
-            if (params.has("debug")) {
-              alert(
-                JSON.stringify({ key: e.key, meta: e.metaKey, code: e.code })
-              );
-            }
             return;
           }
           onKeyDownHelper(e.key);
