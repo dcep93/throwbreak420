@@ -1,6 +1,9 @@
 import { ReactNode, createRef, useEffect, useState } from "react";
 
+import Buttons from "./Buttons";
+import Center from "./Center";
 import ControllerListener from "./ControllerListener";
+import Settings from "./Settings";
 import UserGuide from "./UserGuide";
 import Video from "./Video";
 import css from "./index.module.css";
@@ -39,7 +42,7 @@ var videoTimeout: NodeJS.Timeout;
 var inputTimeout: NodeJS.Timeout;
 var keysPressed: { [k: string]: boolean } = {};
 
-const historyLog: {
+export const historyLog: {
   answer: string;
   button: string;
   thisFrame: number;
@@ -60,7 +63,7 @@ export default function Main() {
     };
     const [isP1, updateIsP1] = useState(true);
     const [isStanding, updateIsStanding] = useState(true);
-    const [possibles, updatePossibles] = useState({
+    const [possibles, updatePossibles] = useState<{ [k: string]: boolean }>({
       "1": true,
       "2": true,
       "1+2": true,
@@ -247,80 +250,18 @@ export default function Main() {
               backgroundColor,
             }}
           >
-            <div>
-              <form
-                style={{ display: "flex", justifyContent: "space-around" }}
-                onSubmit={(e) => e.preventDefault()}
-              >
-                <div>
-                  {[true, false].map((t) => (
-                    <div key={t ? "t" : "f"}>
-                      <label>
-                        <input
-                          type="radio"
-                          name="isP1"
-                          checked={t === isP1}
-                          onChange={() => updateIsP1(t)}
-                        />
-                        {t ? "p1" : "p2"}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  {[true, false].map((t) => (
-                    <div key={t ? "t" : "f"}>
-                      <label>
-                        <input
-                          type="radio"
-                          name="isStanding"
-                          checked={t === isStanding}
-                          onChange={() => updateIsStanding(t)}
-                        />
-                        {t ? "standing" : "grounded"}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  {Object.entries(possibles).map(([k, v]) => (
-                    <div key={k}>
-                      <label>
-                        <input
-                          type={"checkbox"}
-                          checked={v}
-                          onChange={() =>
-                            updatePossibles(
-                              Object.assign({}, possibles, {
-                                [k]: !v,
-                              })
-                            )
-                          }
-                        />
-                        {k} break
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div>speed: {_speed.toFixed(2)}</div>
-                  <div>
-                    <button
-                      disabled={_speed <= 0.2}
-                      onClick={() => updateSpeed(_speed - 0.05)}
-                    >
-                      ➖
-                    </button>
-                    <button
-                      disabled={_speed >= 2}
-                      onClick={() => updateSpeed(_speed + 0.05)}
-                    >
-                      ➕
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
+            <Settings
+              get={() => ({
+                isP1,
+                updateIsP1,
+                isStanding,
+                updateIsStanding,
+                possibles,
+                updatePossibles,
+                speed,
+                updateSpeed,
+              })}
+            />
             <div
               style={{
                 flexGrow: 1,
@@ -329,102 +270,21 @@ export default function Main() {
               {isLoading ? (
                 <h1 style={{ textAlign: "center" }}>LOADING...</h1>
               ) : null}
-              <div
-                className={css.dual_center}
-                style={{
-                  opacity: isLoading ? 0 : undefined,
-                  height: "100%",
-                  width: "100%",
-                  display: "flex",
-                }}
+              <Center
+                get={() => ({
+                  isLoading,
+                  lastAnswer,
+                  lastInput,
+                  frame,
+                  streak,
+                  highestStreak,
+                  updateUserGuideIsOpen,
+                })}
               >
-                <div
-                  style={{
-                    paddingLeft: "2em",
-                    width: "13em",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <div>
-                    <div>answer: {lastAnswer}</div>
-                    <div>input: {lastInput}</div>
-                    <div>frame: {frame}</div>
-                    <div>streak: {streak}</div>
-                    <div style={{ paddingTop: "1em" }}>
-                      highest streak: {highestStreak}
-                    </div>
-                    <div>
-                      <button
-                        style={{ cursor: "pointer" }}
-                        onClick={() => updateUserGuideIsOpen(true)}
-                      >
-                        User Guide
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    className={css.hidden_on_tall}
-                    style={{
-                      flexGrow: 1,
-                      position: "relative",
-                      overflow: "scroll",
-                      paddingTop: "5em",
-                    }}
-                  >
-                    <div>HISTORY</div>
-                    <table
-                      style={{
-                        fontSize: "small",
-                        position: "absolute",
-                      }}
-                    >
-                      <thead>
-                        <tr>
-                          <td>answer</td>
-                          <td>input</td>
-                          <td>frame</td>
-                          <td>streak</td>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {historyLog
-                          .slice()
-                          .reverse()
-                          .map((o, i) => (
-                            <tr key={i}>
-                              <td>{o.answer}</td>
-                              <td>{o.button}</td>
-                              <td>{o.thisFrame}</td>
-                              <td>{o.streak}</td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <div
-                  style={{
-                    flexGrow: 1,
-                    position: "relative",
-                  }}
-                >
-                  {props.children}
-                </div>
-              </div>
+                {props.children}
+              </Center>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-around" }}>
-              {Object.keys(possibles).map((k) => (
-                <div key={k}>
-                  <button
-                    style={{ padding: "1em", fontSize: "xx-large" }}
-                    onClick={() => handleInput(k)}
-                  >
-                    {k}
-                  </button>
-                </div>
-              ))}
-            </div>
+            <Buttons get={() => ({ possibles, handleInput })} />
           </div>
         )}
       </div>
