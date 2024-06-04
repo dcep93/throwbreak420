@@ -68,7 +68,8 @@ export default function Main() {
       "2": true,
       "1+2": true,
     });
-    const [_speed, _updateSpeed] = useState(1);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_, _updateSpeed] = useState(1);
     const updateSpeed = (newSpeed: number) => {
       const video = mainRef.current;
       if (!video) return;
