@@ -8,7 +8,7 @@ import UserGuide from "./UserGuide";
 import Video from "./Video";
 import css from "./index.module.css";
 
-export const VERSION = "1.2.0";
+export const VERSION = "1.3.0";
 
 const CONFIG = {
   frameStart: 42,
@@ -42,11 +42,18 @@ var videoTimeout: NodeJS.Timeout;
 var inputTimeout: NodeJS.Timeout;
 var keysPressed: { [k: string]: boolean } = {};
 
+enum Correctness {
+  right = "✅",
+  slow = "⚠️",
+  wrong = "❌",
+}
+
 export const historyLog: {
   answer: string;
   button: string;
-  thisFrame: number;
+  frame: number;
   streak: number;
+  correctness: Correctness;
 }[] = [];
 
 export default function Main() {
@@ -84,7 +91,7 @@ export default function Main() {
     );
     const [lastAnswer, updateLastAnswer] = useState("");
     const [lastInput, updateLastInput] = useState("");
-    const [frame, updateFrame] = useState(0);
+    const [lastFrame, updateLastFrame] = useState(0);
     const [isLoading, updateIsLoading] = useState(false);
     const [userGuideIsOpen, _updateUserGuideIsOpen] = useState(
       VERSION > (localStorage.getItem("VERSION") || "")
@@ -155,16 +162,21 @@ export default function Main() {
       if (!video) return;
       if (answer === null) return;
       const rawFrame = Math.ceil(video.currentTime * CONFIG.framesPerSecond);
-      const thisFrame = rawFrame - CONFIG.frameStart;
-      if (thisFrame < 0) return;
+      const frame = rawFrame - CONFIG.frameStart;
+      if (frame < 0) return;
       video.pause();
-      const incorrect = thisFrame > CONFIG.breakWindow || button !== answer;
+      const incorrect = frame > CONFIG.breakWindow || button !== answer;
+      const correctness = !incorrect
+        ? Correctness.right
+        : button === answer
+        ? Correctness.slow
+        : Correctness.wrong;
       updateBackgroundColor(
-        !incorrect
-          ? "rgba(0,0,90)" // right
-          : button === answer
-          ? "rgba(100,80,0)" // slow
-          : "rgba(90,0,0)" // wrong
+        {
+          [Correctness.right]: "rgba(0,0,90)",
+          [Correctness.slow]: "rgba(100,80,0)",
+          [Correctness.wrong]: "rgba(90,0,0)",
+        }[correctness]
       );
       nextStreak = incorrect ? 0 : streak + 1;
       if (!incorrect) {
@@ -174,10 +186,16 @@ export default function Main() {
           localStorage.setItem("streak", nextStreak.toString());
         }
       }
-      historyLog.push({ answer, button, thisFrame, streak: nextStreak });
+      historyLog.push({
+        answer,
+        button,
+        frame,
+        streak: nextStreak,
+        correctness,
+      });
       updateLastAnswer(answer);
       updateLastInput(button);
-      updateFrame(thisFrame);
+      updateLastFrame(frame);
       answer = null;
       videoTimeout = setTimeout(
         () => prepVideo(),
@@ -289,7 +307,7 @@ export default function Main() {
                   isLoading,
                   lastAnswer,
                   lastInput,
-                  frame,
+                  lastFrame,
                   streak,
                   highestStreak,
                   updateUserGuideIsOpen,

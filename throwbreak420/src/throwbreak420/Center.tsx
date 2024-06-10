@@ -8,7 +8,7 @@ export default function Center(props: {
     isLoading: boolean;
     lastAnswer: string;
     lastInput: string;
-    frame: number;
+    lastFrame: number;
     streak: number;
     highestStreak: number;
     updateUserGuideIsOpen: (userGuideIsOpen: boolean) => void;
@@ -27,7 +27,7 @@ export default function Center(props: {
       <div
         style={{
           paddingLeft: "2em",
-          width: "13em",
+          width: "14em",
           display: "flex",
           flexDirection: "column",
         }}
@@ -35,7 +35,7 @@ export default function Center(props: {
         <div>
           <div>answer: {props.get().lastAnswer}</div>
           <div>input: {props.get().lastInput}</div>
-          <div>frame: {props.get().frame}</div>
+          <div>frame: {props.get().lastFrame}</div>
           <div>streak: {props.get().streak}</div>
           <div style={{ paddingTop: "1em" }}>
             highest streak: {props.get().highestStreak}
@@ -71,6 +71,7 @@ export default function Center(props: {
                 <td>input</td>
                 <td>frame</td>
                 <td>streak</td>
+                <td></td>
               </tr>
             </thead>
             <tbody>
@@ -81,8 +82,9 @@ export default function Center(props: {
                   <tr key={i}>
                     <td>{o.answer}</td>
                     <td>{o.button}</td>
-                    <td>{o.thisFrame}</td>
+                    <td>{o.frame}</td>
                     <td>{o.streak}</td>
+                    <td>{o.correctness}</td>
                   </tr>
                 ))}
             </tbody>
