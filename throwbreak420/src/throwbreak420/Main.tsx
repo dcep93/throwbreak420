@@ -161,7 +161,7 @@ export default function Main() {
       const incorrect = thisFrame > CONFIG.breakWindow || button !== answer;
       updateBackgroundColor(
         !incorrect
-          ? "rgba(0,0,30)" // right
+          ? "rgba(0,0,60)" // right
           : button === answer
           ? "rgba(100,80,0)" // slow
           : "rgba(60,0,0)" // wrong
