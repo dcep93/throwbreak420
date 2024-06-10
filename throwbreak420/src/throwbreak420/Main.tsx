@@ -8,7 +8,7 @@ import UserGuide from "./UserGuide";
 import Video from "./Video";
 import css from "./index.module.css";
 
-export const VERSION = "1.1.0";
+export const VERSION = "1.2.0";
 
 const CONFIG = {
   frameStart: 42,
