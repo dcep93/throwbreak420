@@ -6,6 +6,7 @@ import ControllerListener from "./ControllerListener";
 import Settings from "./Settings";
 import UserGuide from "./UserGuide";
 import Video from "./Video";
+import firebase from "./firebase";
 import css from "./index.module.css";
 
 export const VERSION = "1.3.0";
@@ -57,6 +58,7 @@ export const historyLog: {
 }[] = [];
 
 export default function Main() {
+  firebase();
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
 
