@@ -29,6 +29,13 @@ cat <<EOF >firebase.json
         "rewrites": [{
             "source": "**",
             "destination": "/index.html"
+        }],
+        "headers": [{
+            "source": "**/*.@(mp4)",
+            "headers": [ {
+                "key": "Cache-Control",
+                "value": "max-age=604800"
+            } ]
         }]
     }
 }
