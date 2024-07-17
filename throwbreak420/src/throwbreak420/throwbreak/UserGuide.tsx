@@ -73,6 +73,7 @@ export default function UserGuide(props: {
           <div>
             <div>UPDATE LOG:</div>
             <ul>
+              <li>https://throwbreak420.web.app/InputHistory</li>
               <li>quick-glance history correctness</li>
               <li>press 1 and 2 at the same time to trigger 1+2</li>
               <li>remote debug capabilities</li>

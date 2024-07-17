@@ -9,7 +9,7 @@ import Video from "./Video";
 import firebase from "./firebase";
 import css from "./index.module.css";
 
-export const VERSION = "1.3.0";
+export const VERSION = "1.4.0";
 
 const CONFIG = {
   frameStart: 42,
