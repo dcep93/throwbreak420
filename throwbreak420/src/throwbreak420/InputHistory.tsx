@@ -6,6 +6,7 @@ var data: Data = [];
 export default function InputHistory() {
   const [_data, _updateData] = useState(data);
   const updateData = (newData: Data) => {
+    newData = newData.slice(-100);
     data = newData;
     _updateData(newData);
   };
@@ -20,6 +21,7 @@ export default function InputHistory() {
       return;
     }
     const keys = data[data.length - 1].keys.slice();
+    if (pressed === keys.includes(key)) return;
     if (pressed) {
       keys.push(key);
     } else {
@@ -41,8 +43,8 @@ export default function InputHistory() {
         style={{
           margin: "2em",
           backgroundColor: "#282a3a",
-          alignSelf: "stretch",
           flexGrow: 1,
+          overflow: "scroll",
         }}
         tabIndex={1}
         ref={(c) => {
@@ -53,7 +55,19 @@ export default function InputHistory() {
         onKeyDown={(e) => update(e.key, true)}
         onKeyUp={(e) => update(e.key, false)}
       >
-        InputHistory
+        <table>
+          <tbody>
+            {_data
+              .slice()
+              .reverse()
+              .map((d, i) => (
+                <tr key={i}>
+                  <td style={{ paddingRight: "2em" }}>{d.timestamp}</td>
+                  <td>{d.keys.join(" ")}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
