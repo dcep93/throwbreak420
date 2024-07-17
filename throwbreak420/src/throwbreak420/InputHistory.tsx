@@ -45,6 +45,7 @@ export default function InputHistory() {
           margin: "2em",
           flexGrow: 1,
           overflow: "scroll",
+          outline: "none",
         }}
         tabIndex={1}
         ref={(c) => {
