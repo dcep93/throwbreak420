@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { historyLog } from "./Main";
+import { historyLog } from "./ThrowBreak";
 import css from "./index.module.css";
 
 export default function Center(props: {

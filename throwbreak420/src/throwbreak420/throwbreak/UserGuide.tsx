@@ -1,4 +1,4 @@
-import { VERSION } from "./Main";
+import { VERSION } from "./ThrowBreak";
 
 export default function UserGuide(props: {
   updateUserGuideIsOpen: (userGuideIsOpen: boolean) => void;
