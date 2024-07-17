@@ -6,7 +6,7 @@ var data: Data = [];
 export default function InputHistory() {
   const [_data, _updateData] = useState(data);
   const updateData = (newData: Data) => {
-    newData = newData.slice(-100);
+    newData = newData.slice(-1000);
     data = newData;
     _updateData(newData);
   };
@@ -34,6 +34,7 @@ export default function InputHistory() {
       style={{
         fontFamily: "Courier New",
         color: "#f3f3f8",
+        backgroundColor: "#282a3a",
         height: "100vH",
         width: "100vW",
         display: "flex",
@@ -42,7 +43,6 @@ export default function InputHistory() {
       <div
         style={{
           margin: "2em",
-          backgroundColor: "#282a3a",
           flexGrow: 1,
           overflow: "scroll",
         }}
@@ -58,11 +58,13 @@ export default function InputHistory() {
         <table>
           <tbody>
             {_data
-              .slice()
+              .slice(1)
               .reverse()
               .map((d, i) => (
                 <tr key={i}>
-                  <td style={{ paddingRight: "2em" }}>{d.timestamp}</td>
+                  <td style={{ paddingRight: "2em" }}>
+                    {d.timestamp - _data[0].timestamp}
+                  </td>
                   <td>{d.keys.join(" ")}</td>
                 </tr>
               ))}
