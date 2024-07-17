@@ -61,18 +61,26 @@ export default function InputHistory() {
         <table>
           <tbody>
             {_data
+              .slice()
+              .reverse()
               .reduce(
                 (obj, curr, index) => {
-                  if (index === 0) {
-                    obj.time = curr.time;
-                  } else if (index === _data.length - 1) {
-                    obj.data.push({ keys: curr.keys, time: 0 });
-                  } else {
-                    const ageFrames =
-                      (_data[index + 1].time - obj.time) / msPerFrame;
-                    if (ageFrames >= 1) {
-                      obj.data.push({ keys: curr.keys, time: ageFrames });
+                  const keys = [curr.keys.sort().join(" ")];
+                  if (keys[0] !== obj.lastKey) {
+                    if (index === 0) {
+                      obj.data.push({ keys, time: 0 });
                       obj.time = curr.time;
+                      obj.lastKey = keys[0];
+                    } else {
+                      const ageFrames = (obj.time - curr.time) / msPerFrame;
+                      if (ageFrames >= 1) {
+                        obj.data.push({
+                          keys,
+                          time: Math.floor(ageFrames),
+                        });
+                        obj.time = curr.time;
+                        obj.lastKey = keys[0];
+                      }
                     }
                   }
                   return obj;
@@ -80,13 +88,13 @@ export default function InputHistory() {
                 {
                   time: 0,
                   data: [] as Data,
+                  lastKey: null as string | null,
                 }
               )
-              .data.reverse()
-              .map((d, i) => (
+              .data.map((d, i) => (
                 <tr key={i}>
-                  <td style={{ paddingRight: "2em" }}>{Math.floor(d.time)}</td>
-                  <td>{d.keys.join(" ")}</td>
+                  <td style={{ paddingRight: "2em" }}>{d.time}</td>
+                  <td>{d.keys[0]}</td>
                 </tr>
               ))}
           </tbody>
@@ -94,17 +102,4 @@ export default function InputHistory() {
       </div>
     </div>
   );
-}
-
-function quantizeData(data: Data): Data {
-  var previous = data[0].time;
-  const quantized = data.filter((d, i) => {
-    if (i === data.length - 1 || data[i + 1].time - previous > msPerFrame) {
-      previous = d.time;
-      return true;
-    } else {
-      return false;
-    }
-  });
-  return quantized;
 }
