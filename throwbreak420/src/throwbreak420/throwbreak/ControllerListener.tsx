@@ -1,5 +1,5 @@
 export default function ControllerListener(
-  onKeyDownHelper: (key: string) => void
+  helper: (key: string, pressed: boolean) => void
 ) {
   window.addEventListener("gamepadconnected", () => {
     const allPressed: { [key: string]: boolean } = {};
@@ -9,10 +9,10 @@ export default function ControllerListener(
           const key = `controller_${i}_${j}`;
           const pressed =
             typeof button === "object" ? button.pressed : button === 1.0;
-          if (pressed && !allPressed[key]) {
-            onKeyDownHelper(key);
+          if (pressed !== allPressed[key]) {
+            allPressed[key] = pressed;
+            helper(key, pressed);
           }
-          allPressed[key] = pressed;
         })
       )
     );

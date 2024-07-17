@@ -205,7 +205,8 @@ export default function ThrowBreak() {
       );
     };
     onEnded = () => handleInput("-");
-    const onKeyDownHelper = (key: string) => {
+    const onKeyDownHelper = (key: string, pressed: boolean) => {
+      if (!pressed) return;
       clearTimeout(inputTimeout);
       if (params.has("debug")) {
         alert(
@@ -245,21 +246,10 @@ export default function ThrowBreak() {
         tabIndex={1}
         ref={(c) => c?.focus()}
         onKeyDown={(e) => {
-          console.log(e);
-          if (params.has("debug")) {
-            alert(
-              JSON.stringify({
-                debug: 224,
-                key: e.key,
-                meta: e.metaKey,
-                code: e.code,
-              })
-            );
-          }
           if (["Alt", "Control", "Meta", "Shift"].includes(e.key)) {
             return;
           }
-          onKeyDownHelper(e.key);
+          onKeyDownHelper(e.key, true);
         }}
         style={{
           fontFamily: "Courier New",
