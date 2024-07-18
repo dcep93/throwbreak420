@@ -35,6 +35,7 @@ export default function InputHistory() {
     <div
       style={{
         fontFamily: "Courier New",
+        fontSize: "x-large",
         color: "#f3f3f8",
         backgroundColor: "#282a3a",
         height: "100vH",
