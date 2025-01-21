@@ -62,6 +62,8 @@ export default function ThrowBreak() {
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
 
+  console.log(65);
+
   // return <SlicePreview />;
 
   function Helper(props: { children: ReactNode }) {
@@ -314,6 +316,8 @@ export default function ThrowBreak() {
       </div>
     );
   }
+
+  console.log(324);
 
   return (
     <Helper>
