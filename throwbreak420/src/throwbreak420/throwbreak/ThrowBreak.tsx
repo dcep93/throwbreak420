@@ -43,6 +43,8 @@ var videoTimeout: NodeJS.Timeout;
 var inputTimeout: NodeJS.Timeout;
 var keysPressed: { [k: string]: boolean } = {};
 
+var onKeyDownHelper: (key: string, pressed: boolean) => void = () => null;
+
 enum Correctness {
   right = "✅",
   slow = "⚠️",
@@ -61,8 +63,6 @@ export default function ThrowBreak() {
   firebase();
   const mainRef = createRef<HTMLVideoElement>();
   const backupRef = createRef<HTMLVideoElement>();
-
-  console.log(65);
 
   // return <SlicePreview />;
 
@@ -153,7 +153,7 @@ export default function ThrowBreak() {
     initialize = () => {
       initialized = true;
       prepVideo();
-      ControllerListener(onKeyDownHelper);
+      ControllerListener((key, pressed) => onKeyDownHelper(key, pressed));
     };
 
     useEffect(() => {
@@ -207,7 +207,7 @@ export default function ThrowBreak() {
       );
     };
     onEnded = () => handleInput("-");
-    const onKeyDownHelper = (key: string, pressed: boolean) => {
+    onKeyDownHelper = (key: string, pressed: boolean) => {
       if (!pressed) return;
       clearTimeout(inputTimeout);
       if (params.has("debug")) {
@@ -316,8 +316,6 @@ export default function ThrowBreak() {
       </div>
     );
   }
-
-  console.log(324);
 
   return (
     <Helper>

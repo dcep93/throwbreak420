@@ -1,9 +1,7 @@
 export default function ControllerListener(
   helper: (key: string, pressed: boolean) => void
 ) {
-  console.log(4);
   window.addEventListener("gamepadconnected", () => {
-    console.log(6);
     const allPressed: { [key: string]: boolean } = {};
     setInterval(() =>
       navigator.getGamepads().forEach((gamepad, i) =>
