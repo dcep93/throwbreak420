@@ -70,14 +70,14 @@ export default function Settings(props: {
           <div>speed: {props.get().speed.toFixed(2)}</div>
           <div>
             <button
-              disabled={props.get().speed <= 0.2}
-              onClick={() => props.get().updateSpeed(props.get().speed - 0.05)}
+              disabled={props.get().speed <= 0.1}
+              onClick={() => props.get().updateSpeed(props.get().speed - 0.01)}
             >
               ➖
             </button>
             <button
-              disabled={props.get().speed >= 2}
-              onClick={() => props.get().updateSpeed(props.get().speed + 0.05)}
+              disabled={props.get().speed >= 4}
+              onClick={() => props.get().updateSpeed(props.get().speed + 0.01)}
             >
               ➕
             </button>
