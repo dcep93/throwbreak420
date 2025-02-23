@@ -113,9 +113,9 @@ export default function ThrowBreak() {
     >(undefined);
 
     const getPath = (choice: string) =>
-      `video/4_2_2024/${isP1 ? "p1" : "p2"}/${
-        isStanding ? "standing" : "grounded"
-      }/${choice.replace("+", "")}.mp4`;
+      `https://dcep93.github.io/throwbreak420/throwbreak420/public/video/4_2_2024/${
+        isP1 ? "p1" : "p2"
+      }/${isStanding ? "standing" : "grounded"}/${choice.replace("+", "")}.mp4`;
 
     const prepVideo = () => {
       if (!initialized) return;
