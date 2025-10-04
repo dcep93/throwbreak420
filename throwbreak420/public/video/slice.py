@@ -1,6 +1,6 @@
 import traceback
 
-import imageio
+import imageio  # type: ignore
 import numpy
 
 # ffmpeg -i raw.mkv -filter:v scale=960:-1 -c:a copy 960.mkv
@@ -27,26 +27,28 @@ import numpy
 # 2:   8460 p2/grounded/2.mp4 8514 8435 8585
 # 1+2: 8940 p2/grounded/12.mp4 8997 8922 9250
 
+
 def main():
-    vid = imageio.get_reader('960.mkv',  'ffmpeg')
+    vid = imageio.get_reader("960.mkv", "ffmpeg")
     data = []
     for num, raw in enumerate(vid.iter_data()):
         img = numpy.asarray(raw)
         data.append(img)
     while True:
-        cmd = input('cmd\n')
+        cmd = input("cmd\n")
         try:
             # path, start, end = cmd.split(' ')
-            path, move = cmd.split(' ')
+            path, move = cmd.split(" ")
             move = int(move)
             start = move - 42
-            end = move + 128 if 'standing' in path else move + 63
+            end = move + 128 if "standing" in path else move + 63
 
             writer = imageio.get_writer(path, fps=60)
-            for img in data[int(start):int(end)]:
+            for img in data[int(start) : int(end)]:
                 writer.append_data(img)
             writer.close()
         except:
             print(traceback.format_exc())
+
 
 main()
