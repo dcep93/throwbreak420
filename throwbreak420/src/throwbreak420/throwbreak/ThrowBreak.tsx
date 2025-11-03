@@ -21,13 +21,12 @@ const CONFIG = {
 
 export const params = new URLSearchParams(window.location.search);
 
-for (const [key, value] of params.entries()) {
+params.forEach((value, key) => {
   if (key in CONFIG) {
     const current = CONFIG[key as keyof typeof CONFIG];
-    CONFIG[key as keyof typeof CONFIG] =
-      typeof current === "number" ? Number(value) : value;
+    CONFIG[key as keyof typeof CONFIG] = Number(value);
   }
-}
+});
 
 const shortcutToInput: { [k: string]: string } = {
   1: "1",
