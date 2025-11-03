@@ -23,7 +23,6 @@ export const params = new URLSearchParams(window.location.search);
 
 params.forEach((value, key) => {
   if (key in CONFIG) {
-    const current = CONFIG[key as keyof typeof CONFIG];
     CONFIG[key as keyof typeof CONFIG] = Number(value);
   }
 });
